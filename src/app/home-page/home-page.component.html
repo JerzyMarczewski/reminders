@@ -1,0 +1,16 @@
+<h1>Lists</h1>
+<mat-list>
+  <mat-list-item *ngFor="let list of this.userLists">
+    {{ list.name }}
+  </mat-list-item>
+</mat-list>
+<ul></ul>
+<h1>Reminders</h1>
+<mat-list>
+  <mat-list-item *ngFor="let reminders of this.userReminders">
+    {{ reminders.title }}
+  </mat-list-item>
+</mat-list>
+
+<!-- <button (click)="handleAddList()">add List</button> -->
+<!-- <button (click)="handleButtonClick()">add Reminder</button> -->
