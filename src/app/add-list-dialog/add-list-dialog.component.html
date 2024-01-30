@@ -1,35 +1,38 @@
 <h2 mat-dialog-title>Add New List</h2>
+<div
+  class="listPreview"
+  [ngStyle]="{ 'background-color': addListFormGroup.value.color }"
+>
+  <mat-icon
+    aria-hidden="false"
+    aria-label="Example home icon"
+    fontIcon="home"
+  ></mat-icon>
+</div>
 <mat-dialog-content>
-  <form (ngSubmit)="onSubmit()">
+  <form (ngSubmit)="onSubmit()" [formGroup]="addListFormGroup">
     <mat-form-field>
-      <input
-        matInput
-        placeholder="List Name"
-        [formControl]="listNameFormControl"
-        required
-      />
-      <mat-error *ngIf="listNameFormControl.invalid">{{
+      <input matInput placeholder="List Name" formControlName="name" required />
+      <!-- <mat-error *ngIf="listNameFormControl.invalid">{{
         getErrorMessage()
-      }}</mat-error>
+      }}</mat-error> -->
     </mat-form-field>
     <mat-form-field>
-      <textarea
-        matInput
-        name="description"
-        placeholder="Description"
-        [(ngModel)]="listDescription"
-      ></textarea>
+      <mat-label>Color</mat-label>
+      <mat-select formControlName="color">
+        <mat-option
+          *ngFor="let color of options.colors"
+          [value]="color"
+          [ngStyle]="{ 'background-color': color }"
+        >
+          {{ color }}
+        </mat-option>
+      </mat-select>
     </mat-form-field>
     <div mat-dialog-actions>
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button
-        mat-button
-        type="submit"
-        color="primary"
-        [disabled]="listNameFormControl.invalid"
-      >
-        Add List
-      </button>
+      <button mat-button type="submit" color="primary">Add List</button>
     </div>
   </form>
 </mat-dialog-content>
+<!-- [disabled]="listNameFormControl.invalid" -->
