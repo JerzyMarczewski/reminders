@@ -1,16 +1,62 @@
-<h1>Lists</h1>
-<mat-list>
-  <mat-list-item *ngFor="let list of this.userLists">
-    {{ list.name }}
-  </mat-list-item>
-</mat-list>
-<ul></ul>
-<h1>Reminders</h1>
-<mat-list>
-  <mat-list-item *ngFor="let reminders of this.userReminders">
-    {{ reminders.title }}
-  </mat-list-item>
-</mat-list>
+<div id="homePage">
+  <mat-toolbar color="primary">
+    <button mat-fab [matMenuTriggerFor]="addMenu">
+      <mat-icon>add</mat-icon>
+    </button>
+    <mat-menu #addMenu="matMenu">
+      <button mat-menu-item (click)="openAddListDialog()">Add a list</button>
+      <button mat-menu-item (click)="openAddReminderDialog()">
+        Add a reminder
+      </button>
+    </mat-menu>
+  </mat-toolbar>
 
-<!-- <button (click)="handleAddList()">add List</button> -->
-<!-- <button (click)="handleButtonClick()">add Reminder</button> -->
+  <div
+    class="spinnerWrapper"
+    *ngIf="isLoading.lists || isLoading.reminders; else containersData"
+  >
+    <mat-spinner></mat-spinner>
+  </div>
+  <ng-template #containersData>
+    <div class="containers">
+      <section id="listsContainer">
+        <mat-card
+          class="listCard"
+          *ngFor="let list of userLists"
+          [appHighlight]="list === selectedList"
+          [appColor]="list.color"
+          (click)="handleListClick(list)"
+        >
+          <div
+            class="iconWrapper"
+            [ngStyle]="{
+              'background-color': list.color,
+              'border-color': list.color
+            }"
+          >
+            <mat-icon [fontIcon]="list.icon"></mat-icon>
+          </div>
+          <h1>{{ list.name }}</h1>
+        </mat-card>
+      </section>
+
+      <section id="remindersContainer">
+        <mat-card class="reminderCard" *ngFor="let reminder of userReminders">
+          <ng-container
+            *ngIf="selectedList && reminder.listId === selectedList.id"
+          >
+            <h1>{{ reminder.title }}</h1>
+            <p>id: {{ reminder.id }}</p>
+            <p>list id: {{ reminder.listId }}</p>
+          </ng-container>
+        </mat-card>
+        <div *ngIf="listHasNoReminders()">
+          <p>No reminders for the selected list.</p>
+        </div>
+        <div *ngIf="!selectedList">
+          <p>No list selected</p>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+</div>
