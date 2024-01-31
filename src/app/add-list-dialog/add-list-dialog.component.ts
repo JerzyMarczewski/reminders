@@ -1,10 +1,7 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { DialogService } from '../dialog.service';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { FirestoreService } from '../firestore.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-
-// ! add colors
 
 @Component({
   selector: 'app-add-list-dialog',
@@ -56,20 +53,22 @@ export class AddListDialogComponent {
     });
   }
 
-  getErrorMessage() {
-    // if (this.listNameFormControl.hasError('required'))
-    //   return 'You must enter a value';
-    // return '';
+  get name() {
+    return this.addListFormGroup.get('name');
+  }
+  get icon() {
+    return this.addListFormGroup.get('icon');
   }
 
   onSubmit(): void {
-    // if (this.listNameFormControl.valid && this.listNameFormControl.value) {
-    //   this.firestoreService.addList(
-    //     this.listNameFormControl.value,
-    //     this.listDescription
-    //   );
-    //   this.dialogRef.close();
-    // }
+    if (this.addListFormGroup.valid && this.addListFormGroup.value) {
+      this.firestoreService.addList(
+        this.addListFormGroup.value.name,
+        this.addListFormGroup.value.color,
+        this.addListFormGroup.value.icon
+      );
+      this.dialogRef.close();
+    }
   }
 
   onCancel(): void {

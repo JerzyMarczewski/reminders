@@ -6,16 +6,14 @@
   <mat-icon
     aria-hidden="false"
     aria-label="Example home icon"
-    fontIcon="home"
+    [fontIcon]="addListFormGroup.value.icon"
   ></mat-icon>
 </div>
 <mat-dialog-content>
   <form (ngSubmit)="onSubmit()" [formGroup]="addListFormGroup">
     <mat-form-field>
       <input matInput placeholder="List Name" formControlName="name" required />
-      <!-- <mat-error *ngIf="listNameFormControl.invalid">{{
-        getErrorMessage()
-      }}</mat-error> -->
+      <mat-error *ngIf="name?.invalid">You must enter a value</mat-error>
     </mat-form-field>
     <mat-form-field>
       <mat-label>Color</mat-label>
@@ -29,10 +27,29 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+    <mat-form-field>
+      <mat-label>Icon</mat-label>
+      <mat-select formControlName="icon">
+        <mat-option *ngFor="let icon of options.icons" [value]="icon">
+          <mat-icon
+            aria-hidden="false"
+            aria-label="Example home icon"
+            [fontIcon]="icon"
+          ></mat-icon
+          >{{ icon }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <div mat-dialog-actions>
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-button type="submit" color="primary">Add List</button>
+      <button
+        mat-button
+        type="submit"
+        color="primary"
+        [disabled]="addListFormGroup.invalid"
+      >
+        Add List
+      </button>
     </div>
   </form>
 </mat-dialog-content>
-<!-- [disabled]="listNameFormControl.invalid" -->
