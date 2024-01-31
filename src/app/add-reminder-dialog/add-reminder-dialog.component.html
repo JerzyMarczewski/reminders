@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Add New Reminder</h2>
+<mat-dialog-content>
+  <form [formGroup]="addReminderFormGroup" (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" required />
+      <mat-error *ngIf="title?.errors?.['required']"
+        >You must enter a value</mat-error
+      >
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        name="description"
+        formControlName="description"
+      ></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Due Date</mat-label>
+      <input matInput [matDatepicker]="picker" disabled />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker color="primary" disabled="false"></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>List</mat-label>
+      <mat-select formControlName="list" required>
+        <mat-option
+          *ngFor="let list of userLists"
+          [value]="list"
+          [ngStyle]="{ color: list.color }"
+        >
+          {{ list.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="list?.errors?.['required']"
+        >You must choose a value</mat-error
+      >
+    </mat-form-field>
+
+    <div mat-dialog-actions>
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button
+        mat-button
+        type="submit"
+        color="primary"
+        [disabled]="addReminderFormGroup.invalid"
+      >
+        Add Reminder
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>
