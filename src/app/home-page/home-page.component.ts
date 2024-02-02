@@ -28,11 +28,28 @@ export class HomePageComponent {
   ) {}
 
   ngOnInit(): void {
-    this.listsSubscription = this.firestoreService.lists$.subscribe((lists) => {
-      this.userLists = lists;
-      this.isLoading.lists = false;
-    });
-    this.remindersSubscription = this.firestoreService.reminders$.subscribe(
+    this.listsSubscription = this.firestoreService.userLists$.subscribe(
+      (lists) => {
+        this.userLists = lists.sort(
+          (list1, list2) =>
+            list1.creationDate.seconds - list2.creationDate.seconds
+        );
+
+        if (this.isLoading.lists && this.userLists)
+          this.selectedList = this.userLists[0];
+
+        this.isLoading.lists = false;
+
+        const newSelectedList = this.userLists.find(
+          (list) => list.id === this.selectedList?.id
+        );
+
+        if (newSelectedList) this.selectedList = newSelectedList;
+        else this.selectedList = undefined;
+      }
+    );
+
+    this.remindersSubscription = this.firestoreService.userReminders$.subscribe(
       (reminders) => {
         this.userReminders = reminders;
         this.isLoading.reminders = false;
