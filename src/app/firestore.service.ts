@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import {
   CollectionReference,
-  DocumentReference,
   Firestore,
-  Query,
+  Timestamp,
   addDoc,
   collection,
   collectionData,
   query,
   where,
 } from '@angular/fire/firestore';
-import { Observable, Subscription, of, switchMap } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { Reminder } from './reminder.model';
 import { List } from './list.model';
 import { AuthService } from './auth.service';
@@ -20,8 +19,8 @@ import { User } from '@angular/fire/auth';
   providedIn: 'root',
 })
 export class FirestoreService {
-  lists$!: Observable<List[]>;
-  reminders$!: Observable<Reminder[]>;
+  userLists$!: Observable<List[]>;
+  userReminders$!: Observable<Reminder[]>;
 
   listsCollection!: CollectionReference;
   remindersCollection!: CollectionReference;
@@ -30,48 +29,48 @@ export class FirestoreService {
     this.listsCollection = collection(this.firestore, 'lists');
     this.remindersCollection = collection(this.firestore, 'reminders');
 
-    this.lists$ = authService.user$.pipe(
+    this.userLists$ = authService.user$.pipe(
       switchMap((user: User | null) => {
-        if (user && user.uid) {
-          const userListsQuery = query(
-            this.listsCollection,
-            where('userId', '==', user.uid)
-          );
-          return collectionData(userListsQuery, {
-            idField: 'id',
-          }) as Observable<List[]>;
-        } else {
-          return [];
-        }
+        if (!user || !user.uid) return of([] as List[]);
+
+        const userListsQuery = query(
+          this.listsCollection,
+          where('userId', '==', user.uid)
+        );
+
+        return collectionData(userListsQuery, {
+          idField: 'id',
+        }) as Observable<List[]>;
       })
     );
 
-    this.reminders$ = authService.user$.pipe(
+    this.userReminders$ = authService.user$.pipe(
       switchMap((user: User | null) => {
-        if (user && user.uid) {
-          const userRemindersQuery = query(
-            this.remindersCollection,
-            where('userId', '==', user.uid)
-          );
-          return collectionData(userRemindersQuery, {
-            idField: 'id',
-          }) as Observable<Reminder[]>;
-        } else {
-          return [];
-        }
+        if (!user || !user.uid) return of([] as Reminder[]);
+
+        const userRemindersQuery = query(
+          this.remindersCollection,
+          where('userId', '==', user.uid)
+        );
+
+        return collectionData(userRemindersQuery, {
+          idField: 'id',
+        }) as Observable<Reminder[]>;
       })
     );
   }
 
-  addList(name: string, description: string) {
+  addList(name: string, color: string, icon: string) {
     if (!this.authService.uid)
       return console.error(
         'Could not add a new list, because the user is not authenticated'
       );
 
     const newList: Partial<List> = {
+      creationDate: Timestamp.fromDate(new Date()),
       name: name,
-      description: description,
+      color: color,
+      icon: icon,
       userId: this.authService.uid,
     };
 
@@ -81,18 +80,18 @@ export class FirestoreService {
   addReminder(
     title: string,
     listId: string,
-    completed: boolean = false,
     description?: string,
-    dueDate?: Date
+    dueDate?: Timestamp
   ) {
     if (!this.authService.uid)
       return console.error(
-        'Could not add a new list, because the user is not authenticated'
+        'Could not add a new reminder, because the user is not authenticated'
       );
 
     const newReminder: Partial<Reminder> = {
+      creationDate: Timestamp.fromDate(new Date()),
       title: title,
-      completed: completed,
+      completed: false,
       userId: this.authService.uid,
       listId: listId,
     };

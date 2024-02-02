@@ -13,21 +13,11 @@ import { Observable, Subscription, map } from 'rxjs';
 })
 export class AuthService {
   user$: Observable<User | null>;
-  uid$: Observable<string | null>;
+  uid!: string | null;
   userSubscription!: Subscription;
 
   constructor(private auth: Auth) {
     this.user$ = user(auth);
-    this.userSubscription = this.user$.subscribe((aUser: User | null) => {
-      console.log(aUser);
-    });
-
-    this.uid$ = this.user$.pipe(map((user) => (user ? user.uid : null)));
-
-    this.uid$.subscribe((uid) => {
-      // ! DELETE LATER
-      console.log('UID:', uid);
-    });
   }
 
   createUser(email: string, password: string) {
@@ -47,7 +37,6 @@ export class AuthService {
   signInUser(email: string, password: string) {
     signInWithEmailAndPassword(this.auth, email, password)
       .then((userCredential) => {
-        // Signed in
         const user = userCredential.user;
         // ! DELETE LATER
         console.log('User logged in');
