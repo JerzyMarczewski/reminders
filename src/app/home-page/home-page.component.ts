@@ -48,18 +48,8 @@ export class HomePageComponent {
     this.dialogService.openAddReminderDialog();
   }
 
-  handleListClick(list: List) {
+  changeSelectedList(list: List) {
     this.selectedList = list;
-  }
-
-  listHasNoReminders() {
-    if (!this.selectedList) return false;
-
-    return (
-      this.userReminders.filter(
-        (reminder) => reminder.listId === this.selectedList?.id
-      ).length === 0
-    );
   }
 
   ngOnDestroy(): void {

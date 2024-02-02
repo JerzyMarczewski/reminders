@@ -1,0 +1,27 @@
+<div *ngIf="listHasNoReminders()">
+  <p>No reminders for the selected list.</p>
+</div>
+<div *ngIf="!selectedList">
+  <p>No list selected</p>
+</div>
+
+<div class="listOverview" *ngIf="selectedList">
+  <h1
+    [ngStyle]="{
+      color: selectedList.color
+    }"
+  >
+    {{ selectedList.name }}
+  </h1>
+</div>
+<mat-card class="reminderCard" *ngFor="let reminder of userReminders">
+  <ng-container *ngIf="selectedList && reminder.listId === selectedList.id">
+    <h1>{{ reminder.title }}</h1>
+    <p>id: {{ reminder.id }}</p>
+    <p>list id: {{ reminder.listId }}</p>
+    <p>desc: {{ reminder.description }}</p>
+    <p *ngIf="reminder.dueDate">
+      due date: {{ reminder.dueDate.seconds * 1000 | date : "long" }}
+    </p>
+  </ng-container>
+</mat-card>
