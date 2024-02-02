@@ -6,7 +6,9 @@ import {
   addDoc,
   collection,
   collectionData,
+  doc,
   query,
+  updateDoc,
   where,
 } from '@angular/fire/firestore';
 import { Observable, of, switchMap } from 'rxjs';
@@ -21,6 +23,8 @@ import { User } from '@angular/fire/auth';
 export class FirestoreService {
   userLists$!: Observable<List[]>;
   userReminders$!: Observable<Reminder[]>;
+
+  currentUid!: string | undefined;
 
   listsCollection!: CollectionReference;
   remindersCollection!: CollectionReference;
@@ -58,10 +62,14 @@ export class FirestoreService {
         }) as Observable<Reminder[]>;
       })
     );
+
+    this.authService.user$.subscribe(
+      (user: User | null) => (this.currentUid = user?.uid)
+    );
   }
 
   addList(name: string, color: string, icon: string) {
-    if (!this.authService.uid)
+    if (!this.currentUid)
       return console.error(
         'Could not add a new list, because the user is not authenticated'
       );
@@ -71,10 +79,25 @@ export class FirestoreService {
       name: name,
       color: color,
       icon: icon,
-      userId: this.authService.uid,
+      userId: this.currentUid,
     };
 
     return addDoc(this.listsCollection, newList);
+  }
+
+  editList(updatedList: List) {
+    if (!this.currentUid)
+      return console.error(
+        'Could not edit list, because the user is not authenticated'
+      );
+
+    const listRef = doc(this.firestore, 'lists', updatedList.id);
+
+    const { id, ...updatedListWithoutId } = updatedList;
+
+    return updateDoc(listRef, {
+      ...updatedListWithoutId,
+    });
   }
 
   addReminder(
@@ -83,7 +106,7 @@ export class FirestoreService {
     description?: string,
     dueDate?: Timestamp
   ) {
-    if (!this.authService.uid)
+    if (!this.currentUid)
       return console.error(
         'Could not add a new reminder, because the user is not authenticated'
       );
@@ -92,7 +115,7 @@ export class FirestoreService {
       creationDate: Timestamp.fromDate(new Date()),
       title: title,
       completed: false,
-      userId: this.authService.uid,
+      userId: this.currentUid,
       listId: listId,
     };
 
