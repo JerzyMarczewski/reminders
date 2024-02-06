@@ -11,7 +11,7 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, iif, of, switchMap, map } from 'rxjs';
 import { Reminder } from './reminder.model';
 import { List } from './list.model';
 import { AuthService } from './auth.service';
@@ -34,38 +34,62 @@ export class FirestoreService {
     this.remindersCollection = collection(this.firestore, 'reminders');
 
     this.userLists$ = authService.user$.pipe(
-      switchMap((user: User | null) => {
-        if (!user || !user.uid) return of([] as List[]);
-
-        const userListsQuery = query(
-          this.listsCollection,
-          where('userId', '==', user.uid)
-        );
-
-        return collectionData(userListsQuery, {
-          idField: 'id',
-        }) as Observable<List[]>;
-      })
+      switchMap((user) =>
+        iif(
+          () => user !== null && user.uid !== null,
+          this.getUserListsData(user!.uid),
+          of([] as List[])
+        )
+      ),
+      map((lists) =>
+        lists.sort(
+          (list1, list2) =>
+            list1.creationDate.seconds - list2.creationDate.seconds
+        )
+      )
     );
 
     this.userReminders$ = authService.user$.pipe(
-      switchMap((user: User | null) => {
-        if (!user || !user.uid) return of([] as Reminder[]);
-
-        const userRemindersQuery = query(
-          this.remindersCollection,
-          where('userId', '==', user.uid)
-        );
-
-        return collectionData(userRemindersQuery, {
-          idField: 'id',
-        }) as Observable<Reminder[]>;
-      })
+      switchMap((user) =>
+        iif(
+          () => user !== null && user.uid !== null,
+          this.getUserRemindersData(user!.uid),
+          of([] as Reminder[])
+        )
+      ),
+      map((reminders) =>
+        reminders.sort(
+          (reminder1, reminder2) =>
+            reminder1.creationDate.seconds - reminder2.creationDate.seconds
+        )
+      )
     );
 
     this.authService.user$.subscribe(
       (user: User | null) => (this.currentUid = user?.uid)
     );
+  }
+
+  private getUserListsData(uid: string) {
+    const userListsQuery = query(
+      this.listsCollection,
+      where('userId', '==', uid)
+    );
+
+    return collectionData(userListsQuery, {
+      idField: 'id',
+    }) as Observable<List[]>;
+  }
+
+  private getUserRemindersData(uid: string) {
+    const userRemindersQuery = query(
+      this.remindersCollection,
+      where('userId', '==', uid)
+    );
+
+    return collectionData(userRemindersQuery, {
+      idField: 'id',
+    }) as Observable<Reminder[]>;
   }
 
   addList(name: string, color: string, icon: string) {
