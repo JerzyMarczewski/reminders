@@ -6,6 +6,7 @@ import {
   addDoc,
   collection,
   collectionData,
+  deleteDoc,
   doc,
   query,
   updateDoc,
@@ -124,6 +125,17 @@ export class FirestoreService {
     });
   }
 
+  deleteList(listId: string) {
+    if (!this.currentUid)
+      return console.error(
+        'Could not delete list, because the user is not authenticated'
+      );
+
+    const listRef = doc(this.firestore, 'lists', listId);
+
+    return deleteDoc(listRef);
+  }
+
   addReminder(
     title: string,
     listId: string,
@@ -147,5 +159,63 @@ export class FirestoreService {
     if (dueDate) newReminder.dueDate = dueDate;
 
     return addDoc(this.remindersCollection, newReminder);
+  }
+
+  editReminder(
+    id: string,
+    creationDate: Timestamp,
+    title: string,
+    completed: boolean,
+    userId: string,
+    listId: string,
+    description?: string,
+    dueDate?: Timestamp
+  ) {
+    if (!this.currentUid)
+      return console.error(
+        'Could not edit the reminder, because the user is not authenticated'
+      );
+
+    const reminderRef = doc(this.firestore, 'reminders', id);
+
+    const updatedReminder: Partial<Reminder> = {
+      creationDate,
+      title,
+      completed,
+      userId,
+      listId,
+    };
+
+    if (description) updatedReminder.description = description;
+    if (dueDate) updatedReminder.dueDate = dueDate;
+
+    return updateDoc(reminderRef, updatedReminder);
+  }
+
+  toggleReminderCompletion(reminder: Reminder) {
+    if (!this.currentUid)
+      return console.error(
+        'Could not edit reminder, because the user is not authenticated'
+      );
+
+    const reminderRef = doc(this.firestore, 'reminders', reminder.id);
+
+    reminder.completed = !reminder.completed;
+    const { id, ...updatedReminderWithoutId } = reminder;
+
+    return updateDoc(reminderRef, {
+      ...updatedReminderWithoutId,
+    });
+  }
+
+  deleteReminder(reminderId: string) {
+    if (!this.currentUid)
+      return console.error(
+        'Could not delete reminder, because the user is not authenticated'
+      );
+
+    const reminderRef = doc(this.firestore, 'reminders', reminderId);
+
+    return deleteDoc(reminderRef);
   }
 }
