@@ -1,0 +1,33 @@
+<div class="completeButtonWrapper">
+  <button
+    class="completeButton"
+    [ngStyle]="{ 'border-color': listColor }"
+    (click)="toggleReminder()"
+  >
+    <div
+      class="compleButton-innerCircle"
+      *ngIf="reminder.completed"
+      [ngStyle]="{ 'background-color': listColor }"
+    ></div>
+  </button>
+</div>
+
+<div class="info">
+  <h1 class="info-title">{{ reminder.title }}</h1>
+  <p class="info-desc">{{ reminder.description }}</p>
+  <p
+    class="info-date"
+    *ngIf="reminder.dueDate"
+    [ngClass]="{ pastDate: overdueDate }"
+  >
+    {{ reminder.dueDate.seconds * 1000 | date : "MMM d, y, H:mm" }}
+  </p>
+</div>
+
+<button
+  mat-icon-button
+  aria-label="Reminder info button"
+  (click)="openReminderInfo()"
+>
+  <mat-icon [ngStyle]="{ color: listColor }">info</mat-icon>
+</button>
