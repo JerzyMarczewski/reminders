@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+
+  form {
+    display: flex;
+    flex-direction: column;
+
+    > .actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
