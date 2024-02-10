@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { List } from '../list.model';
 import { Reminder } from '../reminder.model';
+import { DialogService } from '../dialog.service';
+import { FirestoreService } from '../firestore.service';
 
 @Component({
   selector: 'app-selected-list-panel',
@@ -10,9 +12,23 @@ import { Reminder } from '../reminder.model';
 export class SelectedListPanelComponent {
   @Input({ required: true }) selectedList!: List | undefined;
   @Input({ required: true }) userReminders: Reminder[] = [];
-  // @Output() listSelect = new EventEmitter<List>();
 
-  listHasNoReminders() {
+  completedRemindersShown = false;
+
+  constructor(
+    private dialogService: DialogService,
+    private firestoreService: FirestoreService
+  ) {}
+
+  getSelectedListReminders(): Reminder[] {
+    if (!this.selectedList) return [];
+
+    return this.userReminders.filter(
+      (reminder) => reminder.listId === this.selectedList!.id
+    );
+  }
+
+  listHasNoReminders(): boolean {
     if (!this.selectedList) return false;
 
     return (
@@ -20,5 +36,21 @@ export class SelectedListPanelComponent {
         (reminder) => reminder.listId === this.selectedList?.id
       ).length === 0
     );
+  }
+
+  handleEditListInfoClick(list: List) {
+    this.dialogService.openEditListDialog(list);
+  }
+
+  hanleEditReminderInfoClick(reminder: Reminder) {
+    this.dialogService.openEditReminderDialog(reminder);
+  }
+
+  handleShowCompletedToggle(): void {
+    this.completedRemindersShown = !this.completedRemindersShown;
+  }
+
+  handleDeleteClick(listId: string): void {
+    this.firestoreService.deleteList(listId);
   }
 }
