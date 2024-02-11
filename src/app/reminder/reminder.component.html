@@ -12,8 +12,10 @@
   </button>
 </div>
 
-<div class="info">
-  <h1 class="info-title">{{ reminder.title }}</h1>
+<div class="info" [ngClass]="{ completed: reminder.completed }">
+  <h1 class="info-title">
+    {{ reminder.title }}
+  </h1>
   <p class="info-desc">{{ reminder.description }}</p>
   <p
     class="info-date"

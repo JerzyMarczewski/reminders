@@ -44,6 +44,14 @@ $icon-size: 4rem;
   >.info {
     width: calc(100% - 2 * $icon-size);
 
+    &.completed{
+      color: #777;
+
+      .info-title {
+        text-decoration: line-through;
+      }
+    }
+
     > h1, p {
       margin: 0;
     }
