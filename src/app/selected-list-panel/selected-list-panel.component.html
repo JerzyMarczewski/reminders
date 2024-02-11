@@ -32,21 +32,21 @@
       type="button"
       (click)="handleDeleteClick(selectedList.id)"
     >
-      <mat-icon fontIcon="delete" />Delete List
+      <mat-icon fontIcon="delete" color="warn" />Delete List
     </button>
   </mat-menu>
 </div>
 
 <app-reminder
-  *ngFor="let reminder of getSelectedListReminders()"
+  *ngFor="let reminder of getShownReminders()"
   [reminder]="reminder"
   [listColor]="selectedList?.color"
 ></app-reminder>
 
-<div *ngIf="listHasNoReminders()">
-  <p>No reminders for the selected list.</p>
+<div class="messageWrapper" *ngIf="listHasNoReminders()">
+  <p>No reminders in the selected list</p>
 </div>
 
-<div *ngIf="!selectedList">
+<div class="messageWrapper" *ngIf="!selectedList">
   <p>No list selected</p>
 </div>

@@ -28,6 +28,20 @@ export class SelectedListPanelComponent {
     );
   }
 
+  getRemindersSortedByCompletion(): Reminder[] {
+    const reminders = this.getSelectedListReminders();
+
+    return reminders.sort((a, b) => Number(a.completed) - Number(b.completed));
+  }
+
+  getShownReminders() {
+    const reminders = this.getRemindersSortedByCompletion();
+
+    if (this.completedRemindersShown) return reminders;
+
+    return reminders.filter((reminder) => !reminder.completed);
+  }
+
   listHasNoReminders(): boolean {
     if (!this.selectedList) return false;
 
