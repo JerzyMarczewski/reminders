@@ -1,0 +1,21 @@
+<mat-card
+  class="listCard"
+  [appHighlight]="selected"
+  [appColor]="list.color"
+  (click)="emitSelectionToPanel()"
+>
+  <div
+    class="iconWrapper"
+    [matBadge]="uncompletedReminders"
+    [matBadgeHidden]="uncompletedReminders === 0"
+    matBadgeColor="warn"
+    matBadgeSize="medium"
+    [ngStyle]="{
+      'background-color': list.color,
+      'border-color': list.color
+    }"
+  >
+    <mat-icon [fontIcon]="list.icon"></mat-icon>
+  </div>
+  <h1>{{ list.name }}</h1>
+</mat-card>
