@@ -23,8 +23,10 @@ export class DialogService {
     });
   }
 
-  openAddReminderDialog(): void {
-    this.dialog.open(AddReminderDialogComponent);
+  openAddReminderDialog(selectedList: List | undefined): void {
+    this.dialog.open(AddReminderDialogComponent, {
+      data: selectedList,
+    });
   }
 
   openEditReminderDialog(reminder: Reminder): void {
