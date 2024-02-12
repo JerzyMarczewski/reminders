@@ -1,0 +1,36 @@
+<div id="signIn">
+  <h1 class="mat-h1 mat-primary" color="primary">Sign In</h1>
+  <form (ngSubmit)="onSubmit()" [formGroup]="signInFormGroup">
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input
+        type="email"
+        matInput
+        formControlName="email"
+        placeholder="example@example.com"
+      />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input
+        type="password"
+        matInput
+        formControlName="password"
+        placeholder="password"
+      />
+    </mat-form-field>
+
+    <div class="actions" mat-dialog-actions>
+      <button
+        mat-raised-button
+        type="submit"
+        color="primary"
+        [disabled]="signInFormGroup.invalid"
+      >
+        Sign In
+      </button>
+      <p>New User? <a [routerLink]="['/sign-up']">Sign up</a></p>
+    </div>
+  </form>
+</div>
