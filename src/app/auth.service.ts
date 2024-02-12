@@ -6,17 +6,16 @@ import {
   signInWithEmailAndPassword,
   user,
 } from '@angular/fire/auth';
-import { Observable, Subscription, map } from 'rxjs';
+import { Router } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   user$: Observable<User | null>;
-  uid!: string | null;
-  userSubscription!: Subscription;
 
-  constructor(private auth: Auth) {
+  constructor(private auth: Auth, private router: Router) {
     this.user$ = user(auth);
   }
 
@@ -45,6 +44,17 @@ export class AuthService {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.error(errorMessage);
+      });
+  }
+
+  signOutUser() {
+    this.auth
+      .signOut()
+      .then(() => {
+        console.log('User logged out successfully');
+      })
+      .catch((error) => {
+        console.error('Error while logging out:', error);
       });
   }
 }
