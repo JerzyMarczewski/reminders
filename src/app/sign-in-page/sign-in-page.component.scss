@@ -1,3 +1,6 @@
+$primary: #3F51B5;
+$accent: #FF4886;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -11,12 +14,16 @@
     padding: 2rem 2rem;
     border-radius: 1rem;
     
-    background-color: lightgray;
+    border: 0.25rem solid $primary; //#3F51B5;
+    background-color: rgba($color: $primary, $alpha: 0.2);
+
 
     h1 {
+      padding: 2rem 0;
       text-align: center;
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: 600;
+      color: $primary;
     }
 
     form {
@@ -25,12 +32,23 @@
       justify-content: center;
       align-items: center;
 
+
       .actions {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 0.2rem;
+
+        button[type=submit] {
+          font-size: 1.25rem;
+          padding: 1.5rem 2rem;
+        }
+
+        p {
+          margin: 0.25rem;
+          font-size: 0.75rem;
+        }
       }
     }
   }

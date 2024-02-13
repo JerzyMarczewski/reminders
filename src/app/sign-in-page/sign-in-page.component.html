@@ -1,7 +1,7 @@
 <div id="signIn">
   <h1 class="mat-h1 mat-primary" color="primary">Sign In</h1>
   <form (ngSubmit)="onSubmit()" [formGroup]="signInFormGroup">
-    <mat-form-field>
+    <mat-form-field class="field">
       <mat-label>Email</mat-label>
       <input
         type="email"
@@ -9,9 +9,13 @@
         formControlName="email"
         placeholder="example@example.com"
       />
+      <mat-error *ngIf="email?.invalid && email?.touched">
+        <span *ngIf="email?.errors?.['required']">Email is required.</span>
+        <span *ngIf="email?.errors?.['email']">Invalid email format.</span>
+      </mat-error>
     </mat-form-field>
 
-    <mat-form-field>
+    <mat-form-field class="field">
       <mat-label>Password</mat-label>
       <input
         type="password"
@@ -19,6 +23,14 @@
         formControlName="password"
         placeholder="password"
       />
+      <mat-error *ngIf="password?.invalid && password?.touched">
+        <span *ngIf="password?.errors?.['required']"
+          >Password is required.</span
+        >
+        <span *ngIf="password?.errors?.['minlength']"
+          >Password is too short</span
+        >
+      </mat-error>
     </mat-form-field>
 
     <div class="actions" mat-dialog-actions>
@@ -27,6 +39,7 @@
         type="submit"
         color="primary"
         [disabled]="signInFormGroup.invalid"
+        (click)="onSubmit()"
       >
         Sign In
       </button>

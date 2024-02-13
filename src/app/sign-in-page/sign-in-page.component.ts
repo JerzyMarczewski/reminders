@@ -34,7 +34,10 @@ export class SignInPageComponent {
   }
 
   onSubmit() {
-    if (this.signInFormGroup.valid && this.email && this.password)
-      return this.authService.signInUser(this!.email, this.password);
+    if (this.signInFormGroup.valid && this.signInFormGroup.valid)
+      return this.authService.signInUser(
+        this.signInFormGroup.value.email,
+        this.signInFormGroup.value.password
+      );
   }
 }
