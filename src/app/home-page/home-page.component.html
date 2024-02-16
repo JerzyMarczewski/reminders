@@ -1,6 +1,6 @@
 <div id="homePage">
-  <mat-toolbar color="primary">
-    <button mat-fab [matMenuTriggerFor]="addMenu">
+  <mat-toolbar class="toolbar" color="primary">
+    <button mat-mini-fab [matMenuTriggerFor]="addMenu">
       <mat-icon>add</mat-icon>
     </button>
     <mat-menu #addMenu="matMenu">
@@ -8,6 +8,16 @@
       <button mat-menu-item (click)="openAddReminderDialog()">
         Add a reminder
       </button>
+    </mat-menu>
+    <button class="userButton" mat-mini-fab [matMenuTriggerFor]="userMenu">
+      <img
+        src="../../assets/images/default-avatar.png"
+        alt="default avatar image"
+      />
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <p *ngIf="username$ | async as username">{{ username }}</p>
+      <button mat-menu-item (click)="handleSignOut()">Sign Out</button>
     </mat-menu>
   </mat-toolbar>
 
@@ -17,10 +27,12 @@
   >
     <mat-spinner></mat-spinner>
   </div>
+
   <ng-template #containersData>
     <div class="containers">
       <app-list-panel
         [userLists]="userLists"
+        [userReminders]="userReminders"
         [selectedList]="selectedList"
         (listSelect)="changeSelectedList($event)"
       />
