@@ -4,27 +4,30 @@ import {
   User,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
   user,
 } from '@angular/fire/auth';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   user$: Observable<User | null>;
+  private authErrorSubject = new BehaviorSubject<string | null>(null);
+  authError$ = this.authErrorSubject.asObservable();
 
-  constructor(private auth: Auth, private router: Router) {
+  constructor(private auth: Auth, private snackBar: MatSnackBar) {
     this.user$ = user(auth);
   }
 
-  createUser(email: string, password: string) {
+  createUser(username: string, email: string, password: string) {
     createUserWithEmailAndPassword(this.auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        // ! DELETE LATER
-        console.log('User added to the DB');
+        return updateProfile(user, { displayName: username });
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -40,11 +43,7 @@ export class AuthService {
         // ! DELETE LATER
         console.log('User logged in');
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorMessage);
-      });
+      .catch((error) => this.displayError(error));
   }
 
   signOutUser() {
@@ -56,5 +55,20 @@ export class AuthService {
       .catch((error) => {
         console.error('Error while logging out:', error);
       });
+  }
+
+  private displayError(error: any) {
+    let errorMessage = 'An error occurred during authentication.';
+
+    if (error.code === 'auth/invalid-credential') {
+      errorMessage = 'Invalid email or password.';
+    }
+
+    this.authErrorSubject.next(errorMessage);
+    this.snackBar.open(errorMessage, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+    });
   }
 }
