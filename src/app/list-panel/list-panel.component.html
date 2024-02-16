@@ -1,21 +1,11 @@
-<mat-card
-  class="listCard"
+<app-list
   *ngFor="let list of userLists"
-  [appHighlight]="list === selectedList"
-  [appColor]="list.color"
-  (click)="selectList(list)"
->
-  <div
-    class="iconWrapper"
-    [ngStyle]="{
-      'background-color': list.color,
-      'border-color': list.color
-    }"
-  >
-    <mat-icon [fontIcon]="list.icon"></mat-icon>
-  </div>
-  <h1>{{ list.name }}</h1>
-</mat-card>
+  [list]="list"
+  [selected]="list.id === selectedList?.id"
+  [uncompletedReminders]="countListUncompletedReminders(list)"
+  (listSelectEvent)="handleSelectListEvent($event)"
+></app-list>
+
 <div *ngIf="!userLists.length">
   <p>You don't have any lists created</p>
 </div>
