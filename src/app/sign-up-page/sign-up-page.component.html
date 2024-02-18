@@ -1,1 +1,109 @@
-<p>sign-up-page works!</p>
+<div id="signUp">
+  <h1 class="mat-h1 mat-primary" color="primary">Sign Up</h1>
+  <form (ngSubmit)="onSubmit()" [formGroup]="signUpFormGroup">
+    <mat-form-field class="field" appearance="outline">
+      <mat-label>Username</mat-label>
+      <input type="text" matInput formControlName="username" />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Person icon"
+        fontIcon="person"
+      ></mat-icon>
+      <mat-error> Username is required. </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input
+        type="email"
+        matInput
+        formControlName="email"
+        placeholder="example@example.com"
+      />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Mail icon"
+        fontIcon="mail"
+      ></mat-icon>
+      <mat-error
+        *ngIf="signUpFormGroup.controls?.['email']?.invalid && signUpFormGroup.controls?.['email']?.touched"
+      >
+        <span *ngIf="signUpFormGroup.controls?.['email']?.errors?.['required']"
+          >Email is required.</span
+        >
+        <span *ngIf="signUpFormGroup.controls?.['email']?.errors?.['email']"
+          >Invalid email format.</span
+        >
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="field" appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        type="password"
+        matInput
+        formControlName="password"
+        placeholder="password"
+      />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Lock icon"
+        fontIcon="lock"
+      ></mat-icon>
+      <mat-error
+        *ngIf="signUpFormGroup.controls?.['password']?.invalid && signUpFormGroup.controls?.['password']?.touched"
+      >
+        <span
+          *ngIf="signUpFormGroup.controls?.['password']?.errors?.['required']"
+          >Password is required.</span
+        >
+        <span
+          *ngIf="signUpFormGroup.controls?.['password']?.errors?.['minlength']"
+          >Password is too short</span
+        >
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="field" appearance="outline">
+      <mat-label>Confirm Password</mat-label>
+      <input
+        type="password"
+        matInput
+        formControlName="confirmPassword"
+        placeholder="confirm password"
+      />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Lock icon"
+        fontIcon="lock"
+      ></mat-icon>
+      <mat-error
+        *ngIf="signUpFormGroup.controls?.['confirmPassword']?.invalid && signUpFormGroup.controls?.['confirmPassword']?.touched"
+      >
+        <span
+          *ngIf="signUpFormGroup.controls?.['confirmPassword']?.errors?.['required']"
+          >Password is required.</span
+        >
+        <span *ngIf="signUpFormGroup.hasError('passwordsNotMatch')"
+          >Passwords do not match.</span
+        >
+      </mat-error>
+    </mat-form-field>
+
+    <div class="actions" mat-dialog-actions>
+      <button
+        mat-raised-button
+        type="submit"
+        color="primary"
+        [disabled]="signUpFormGroup.invalid"
+      >
+        Sign In
+      </button>
+      <p>Have an account? <a [routerLink]="['/sign-in']">Sign in</a></p>
+    </div>
+  </form>
+</div>
