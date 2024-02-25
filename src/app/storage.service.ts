@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Storage, getDownloadURL, listAll, ref } from '@angular/fire/storage';
-import { Observable, from, map, of, switchMap } from 'rxjs';
+import { Observable, from, map, of, shareReplay, switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
-import { user } from '@angular/fire/auth';
+import { User } from '@angular/fire/auth';
+
+export interface Avatar {
+  path: string;
+  url: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -13,40 +18,59 @@ export class StorageService {
     private authService: AuthService
   ) {}
 
-  getUserAvatar() {
+  getUserAvatar(): Observable<Avatar | null> {
     return this.authService.user$.pipe(
-      map((user) => {
-        if (!user) return of(null);
+      switchMap((user: User | null) => {
+        if (!user) {
+          return of(null);
+        }
 
-        const avatarImgPath = user?.photoURL || null;
-        if (!avatarImgPath) return of(null);
+        const avatarImgPath = user.photoURL || null;
+        if (!avatarImgPath) {
+          return of(null);
+        }
 
         const avatarImgRef = ref(this.storage, avatarImgPath);
-        const avatarImgUrl = getDownloadURL(avatarImgRef);
-
-        return from(avatarImgUrl);
+        return from(getDownloadURL(avatarImgRef)).pipe(
+          map(
+            (avatarImgUrl: string) =>
+              ({
+                path: avatarImgPath,
+                url: avatarImgUrl,
+              } as Avatar)
+          )
+        );
       }),
-      switchMap((avatarImgUrl$) => avatarImgUrl$)
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 
-  getAllAvatars() {
-    const folderPath = 'avatars';
-    const folderRef = ref(this.storage, folderPath);
+  getAllAvatars(): Promise<Avatar[]> {
+    return new Promise<Avatar[]>((resolve, reject) => {
+      const folderPath = 'avatars';
+      const folderRef = ref(this.storage, folderPath);
+      const avatarsData: { path: string; url: string }[] = [];
 
-    const avatarsData: { path: string; url: string }[] = [];
-
-    listAll(folderRef).then((result) => {
-      result.items.forEach((itemRef) => {
-        getDownloadURL(itemRef).then((url) => {
-          avatarsData.push({
-            path: itemRef.fullPath,
-            url: url,
+      listAll(folderRef)
+        .then((result) => {
+          const promises = result.items.map((itemRef) => {
+            return getDownloadURL(itemRef).then((url) => {
+              avatarsData.push({
+                path: itemRef.fullPath,
+                url: url,
+              });
+            });
           });
-        });
-      });
-    });
 
-    return avatarsData;
+          return Promise.all(promises);
+        })
+        .then(() => {
+          resolve(avatarsData);
+        })
+        .catch((error) => {
+          console.error('Error while fetching avatars', error);
+          reject(error);
+        });
+    });
   }
 }
