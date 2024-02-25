@@ -6,6 +6,7 @@ import { EditListDialogComponent } from './edit-list-dialog/edit-list-dialog.com
 import { List } from './list.model';
 import { Reminder } from './reminder.model';
 import { EditReminderDialogComponent } from './edit-reminder-dialog/edit-reminder-dialog.component';
+import { EditUserProfileDialogComponent } from './edit-user-profile-dialog/edit-user-profile-dialog.component';
 
 @Injectable({
   providedIn: 'root',
@@ -33,5 +34,9 @@ export class DialogService {
     this.dialog.open(EditReminderDialogComponent, {
       data: reminder,
     });
+  }
+
+  openEditProfileDialog(): void {
+    this.dialog.open(EditUserProfileDialogComponent);
   }
 }
