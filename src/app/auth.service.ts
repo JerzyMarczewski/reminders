@@ -2,39 +2,30 @@ import { Injectable } from '@angular/core';
 import {
   Auth,
   User,
-  authState,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
   user,
 } from '@angular/fire/auth';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  from,
-  map,
-  of,
-  take,
-} from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   user$: Observable<User | null>;
-  username$: Observable<string | null>;
   private authErrorSubject = new BehaviorSubject<string | null>(null);
   authError$ = this.authErrorSubject.asObservable();
-  displayName$: Observable<string | null>;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
 
   constructor(public auth: Auth, private snackBar: MatSnackBar) {
     this.user$ = user(auth);
-    this.username$ = this.user$.pipe(
-      map((user) => (user ? user.displayName : null))
-    );
-    this.displayName$ = of(this.auth.currentUser?.displayName ?? null);
+    this.user$.subscribe(this.currentUserSubject);
+  }
+
+  getCurrentUser$(): BehaviorSubject<User | null> {
+    return this.currentUserSubject;
   }
 
   createUser(username: string, email: string, password: string) {
@@ -69,6 +60,7 @@ export class AuthService {
     this.auth
       .signOut()
       .then(() => {
+        // ! change later
         console.log('User logged out successfully');
       })
       .catch((error) => {
@@ -76,17 +68,33 @@ export class AuthService {
       });
   }
 
-  editProfile(username: string, avatarPath: string) {
-    if (!this.auth.currentUser) return;
+  editProfile(username: string, avatarPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const user = this.auth.currentUser;
+      if (!user) {
+        reject(new Error('User is not signed in.'));
+        return;
+      }
 
-    updateProfile(this.auth.currentUser, {
-      displayName: username,
-      photoURL: avatarPath,
-    })
-      .then(() => this.auth.signOut())
-      .catch((error) => {
-        console.error(error);
-      });
+      updateProfile(user, {
+        displayName: username,
+        photoURL: avatarPath,
+      })
+        .then(() => {
+          const updatedUser: User = {
+            ...user,
+            displayName: username,
+            photoURL: avatarPath,
+          };
+
+          this.currentUserSubject.next(updatedUser);
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Error updating display name:', error);
+          reject(error);
+        });
+    });
   }
 
   private displayError(error: any) {
