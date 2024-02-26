@@ -12,7 +12,17 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { Observable, iif, of, switchMap, map } from 'rxjs';
+import {
+  Observable,
+  iif,
+  of,
+  switchMap,
+  map,
+  from,
+  catchError,
+  throwError,
+  BehaviorSubject,
+} from 'rxjs';
 import { Reminder } from './reminder.model';
 import { List } from './list.model';
 import { AuthService } from './auth.service';
@@ -22,52 +32,31 @@ import { User } from '@angular/fire/auth';
   providedIn: 'root',
 })
 export class FirestoreService {
+  currentUser$!: BehaviorSubject<User | null>;
   userLists$!: Observable<List[]>;
   userReminders$!: Observable<Reminder[]>;
-
-  currentUid!: string | undefined;
 
   listsCollection!: CollectionReference;
   remindersCollection!: CollectionReference;
 
   constructor(private firestore: Firestore, private authService: AuthService) {
+    this.currentUser$ = this.authService.getCurrentUser$();
+
     this.listsCollection = collection(this.firestore, 'lists');
     this.remindersCollection = collection(this.firestore, 'reminders');
 
-    this.userLists$ = authService.user$.pipe(
+    this.userLists$ = this.currentUser$.pipe(
       switchMap((user) =>
-        iif(
-          () => user !== null && user.uid !== null,
-          this.getUserListsData(user!.uid),
-          of([] as List[])
-        )
+        user ? this.getUserListsData(user.uid) : of([] as List[])
       ),
-      map((lists) =>
-        lists.sort(
-          (list1, list2) =>
-            list1.creationDate.seconds - list2.creationDate.seconds
-        )
-      )
+      map(this.orderDataByCreationDate)
     );
 
-    this.userReminders$ = authService.user$.pipe(
+    this.userReminders$ = this.currentUser$.pipe(
       switchMap((user) =>
-        iif(
-          () => user !== null && user.uid !== null,
-          this.getUserRemindersData(user!.uid),
-          of([] as Reminder[])
-        )
+        user ? this.getUserRemindersData(user.uid) : of([] as Reminder[])
       ),
-      map((reminders) =>
-        reminders.sort(
-          (reminder1, reminder2) =>
-            reminder1.creationDate.seconds - reminder2.creationDate.seconds
-        )
-      )
-    );
-
-    this.authService.user$.subscribe(
-      (user: User | null) => (this.currentUid = user?.uid)
+      map(this.orderDataByCreationDate)
     );
   }
 
@@ -93,9 +82,20 @@ export class FirestoreService {
     }) as Observable<Reminder[]>;
   }
 
+  private orderDataByCreationDate<T extends { creationDate: Timestamp }>(
+    data: T[]
+  ): T[] {
+    return data.sort(
+      (element1, element2) =>
+        element1.creationDate.seconds - element2.creationDate.seconds
+    );
+  }
+
   addList(name: string, color: string, icon: string) {
-    if (!this.currentUid)
-      return console.error(
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
         'Could not add a new list, because the user is not authenticated'
       );
 
@@ -104,36 +104,56 @@ export class FirestoreService {
       name: name,
       color: color,
       icon: icon,
-      userId: this.currentUid,
+      userId: user.uid,
     };
 
-    return addDoc(this.listsCollection, newList);
+    return from(addDoc(this.listsCollection, newList)).pipe(
+      catchError((error) => {
+        console.error('Error adding list:', error);
+        throw error;
+      })
+    );
   }
 
   editList(updatedList: List) {
-    if (!this.currentUid)
-      return console.error(
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
         'Could not edit list, because the user is not authenticated'
       );
 
     const listRef = doc(this.firestore, 'lists', updatedList.id);
-
     const { id, ...updatedListWithoutId } = updatedList;
 
-    return updateDoc(listRef, {
-      ...updatedListWithoutId,
-    });
+    return from(
+      updateDoc(listRef, {
+        ...updatedListWithoutId,
+      })
+    ).pipe(
+      catchError((error) => {
+        console.error('Error editing list:', error);
+        throw error;
+      })
+    );
   }
 
   deleteList(listId: string) {
-    if (!this.currentUid)
-      return console.error(
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
         'Could not delete list, because the user is not authenticated'
       );
 
     const listRef = doc(this.firestore, 'lists', listId);
 
-    return deleteDoc(listRef);
+    return from(deleteDoc(listRef)).pipe(
+      catchError((error) => {
+        console.error('Error deleting list:', error);
+        throw error;
+      })
+    );
   }
 
   addReminder(
@@ -142,8 +162,10 @@ export class FirestoreService {
     description?: string,
     dueDate?: Timestamp
   ) {
-    if (!this.currentUid)
-      return console.error(
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
         'Could not add a new reminder, because the user is not authenticated'
       );
 
@@ -151,14 +173,18 @@ export class FirestoreService {
       creationDate: Timestamp.fromDate(new Date()),
       title: title,
       completed: false,
-      userId: this.currentUid,
+      userId: user.uid,
       listId: listId,
     };
-
     if (description) newReminder.description = description;
     if (dueDate) newReminder.dueDate = dueDate;
 
-    return addDoc(this.remindersCollection, newReminder);
+    return from(addDoc(this.remindersCollection, newReminder)).pipe(
+      catchError((error) => {
+        console.error('Error adding reminder:', error);
+        throw error;
+      })
+    );
   }
 
   editReminder(
@@ -171,13 +197,14 @@ export class FirestoreService {
     description?: string,
     dueDate?: Timestamp
   ) {
-    if (!this.currentUid)
-      return console.error(
-        'Could not edit the reminder, because the user is not authenticated'
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
+        'Could not add a new reminder, because the user is not authenticated'
       );
 
     const reminderRef = doc(this.firestore, 'reminders', id);
-
     const updatedReminder: Partial<Reminder> = {
       creationDate,
       title,
@@ -185,37 +212,55 @@ export class FirestoreService {
       userId,
       listId,
     };
-
     if (description) updatedReminder.description = description;
     if (dueDate) updatedReminder.dueDate = dueDate;
 
-    return updateDoc(reminderRef, updatedReminder);
+    return from(updateDoc(reminderRef, updatedReminder)).pipe(
+      catchError((error) => {
+        console.error('Error editing reminder:', error);
+        throw error;
+      })
+    );
   }
 
   toggleReminderCompletion(reminder: Reminder) {
-    if (!this.currentUid)
-      return console.error(
-        'Could not edit reminder, because the user is not authenticated'
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
+        'Could not add a new reminder, because the user is not authenticated'
       );
 
     const reminderRef = doc(this.firestore, 'reminders', reminder.id);
-
     reminder.completed = !reminder.completed;
     const { id, ...updatedReminderWithoutId } = reminder;
 
-    return updateDoc(reminderRef, {
-      ...updatedReminderWithoutId,
-    });
+    return from(
+      updateDoc(reminderRef, {
+        ...updatedReminderWithoutId,
+      })
+    ).pipe(
+      catchError((error) => {
+        console.error('Error toggling reminder completion:', error);
+        throw error;
+      })
+    );
   }
 
   deleteReminder(reminderId: string) {
-    if (!this.currentUid)
-      return console.error(
+    const user = this.currentUser$.getValue();
+
+    if (!user)
+      throw new Error(
         'Could not delete reminder, because the user is not authenticated'
       );
 
     const reminderRef = doc(this.firestore, 'reminders', reminderId);
-
-    return deleteDoc(reminderRef);
+    return from(deleteDoc(reminderRef)).pipe(
+      catchError((error) => {
+        console.error('Error deleting reminder:', error);
+        throw error;
+      })
+    );
   }
 }
