@@ -1,0 +1,43 @@
+@import "../variables";
+
+:host {
+  .toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    height: $navbar-height;
+  
+    .userButton {
+      background-color: transparent;
+      border-radius: 50%;
+      overflow: hidden;
+    
+      img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+  
+    .username {
+      text-align: center;
+      color: rebeccapurple;
+    }
+  
+
+  }
+
+  h1 {
+    text-align: center;
+    color: rebeccapurple !important; 
+  }
+}
+
+::ng-deep .mat-menu-content .username {
+  color: blue; /* Example color */
+  font-size: 18px; /* Example font size */
+  font-weight: bold; /* Example font weight */
+  /* Add any other styles you want to apply to the username */
+}

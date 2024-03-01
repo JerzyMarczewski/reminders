@@ -1,0 +1,49 @@
+<mat-toolbar class="toolbar" color="primary">
+  <button mat-mini-fab [matMenuTriggerFor]="addMenu">
+    <mat-icon>add</mat-icon>
+  </button>
+  <mat-menu #addMenu="matMenu">
+    <button mat-menu-item (click)="openAddListDialog()">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="List with a plus sign icon"
+        fontIcon="playlist_add"
+      ></mat-icon
+      >Add a list
+    </button>
+    <button mat-menu-item (click)="openAddReminderDialog()">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Clock with a plus sign icon"
+        fontIcon="more_time"
+      ></mat-icon>
+      Add a reminder
+    </button>
+  </mat-menu>
+
+  <button mat-mini-fab class="userButton" [matMenuTriggerFor]="userMenu">
+    <img [src]="userAvatar?.url" alt="avatar image" />
+  </button>
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item disabled *ngIf="currentUser$ | async as currentUser">
+      Welcome, {{ currentUser.displayName }}
+    </button>
+
+    <button mat-menu-item (click)="onEditProfile()">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Edit icon"
+        fontIcon="edit"
+      ></mat-icon>
+      Edit Profile
+    </button>
+    <button mat-menu-item (click)="handleSignOut()">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Sign out icon"
+        fontIcon="logout"
+      ></mat-icon>
+      Sign Out
+    </button>
+  </mat-menu>
+</mat-toolbar>
