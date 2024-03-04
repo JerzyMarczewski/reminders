@@ -5,51 +5,69 @@
 >
   <mat-icon
     aria-hidden="false"
-    aria-label="Example home icon"
-    [fontIcon]="addListFormGroup.value.icon"
+    aria-label="Selected icon preview"
+    [fontIcon]="delayedIcon"
+    [@iconChange]="iconAnimationState"
   ></mat-icon>
 </div>
 <mat-dialog-content>
-  <form (ngSubmit)="onSubmit()" [formGroup]="addListFormGroup">
-    <mat-form-field>
-      <input matInput placeholder="List Name" formControlName="name" required />
-      <mat-error *ngIf="name?.invalid">You must enter a value</mat-error>
+  <form [formGroup]="addListFormGroup">
+    <mat-form-field appearance="outline">
+      <mat-label>List Name</mat-label>
+      <input matInput formControlName="name" autocomplete="off" required />
+      <mat-error *ngIf="addListFormGroup.get('name')?.hasError('required')">
+        List name is required
+      </mat-error>
     </mat-form-field>
-    <mat-form-field>
-      <mat-label>Color</mat-label>
-      <mat-select formControlName="color">
-        <mat-option
+
+    <div class="colorSelection">
+      <h3>Color:</h3>
+      <div class="colorOptions">
+        <button
+          class="colorButton"
+          mat-fab
           *ngFor="let color of options.colors"
-          [value]="color"
-          [ngStyle]="{ 'background-color': color }"
+          [ngStyle]="{ backgroundColor: color }"
+          [ngClass]="{
+            selected: color === addListFormGroup.get('color')?.value
+          }"
+          (click)="handleColorSelect(color)"
+        ></button>
+      </div>
+    </div>
+
+    <div class="iconSelection">
+      <h3>Icon:</h3>
+      <div class="iconOptions">
+        <button
+          class="iconButton"
+          mat-fab
+          *ngFor="let icon of options.icons"
+          [ngClass]="{
+            selected: icon === addListFormGroup.get('icon')?.value
+          }"
+          (click)="handleIconSelect(icon)"
         >
-          {{ color }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Icon</mat-label>
-      <mat-select formControlName="icon">
-        <mat-option *ngFor="let icon of options.icons" [value]="icon">
           <mat-icon
             aria-hidden="false"
-            aria-label="Example home icon"
+            aria-label="List icon option"
             [fontIcon]="icon"
-          ></mat-icon
-          >{{ icon }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <div mat-dialog-actions>
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button
-        mat-button
-        type="submit"
-        color="primary"
-        [disabled]="addListFormGroup.invalid"
-      >
-        Add List
-      </button>
+          ></mat-icon>
+        </button>
+      </div>
     </div>
   </form>
 </mat-dialog-content>
+
+<mat-dialog-actions class="actions">
+  <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+  <button
+    mat-flat-button
+    type="submit"
+    color="primary"
+    [disabled]="addListFormGroup.invalid"
+    (click)="onSubmit()"
+  >
+    Add List
+  </button>
+</mat-dialog-actions>
