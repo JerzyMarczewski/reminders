@@ -1,74 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, SimpleChanges } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FirestoreService } from '../firestore.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { listColors, listIcons } from '../list-options';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 @Component({
   selector: 'app-add-list-dialog',
   templateUrl: './add-list-dialog.component.html',
   styleUrls: ['./add-list-dialog.component.scss'],
+  animations: [
+    trigger('iconChange', [
+      state('void', style({ opacity: 1, transform: 'scale(1) rotate(0)' })),
+      state('shown', style({ opacity: 1, transform: 'scale(1) rotate(0)' })),
+      state(
+        'hidden',
+        style({ opacity: 0, transform: 'scale(0) rotate(-90deg)' })
+      ),
+      transition('* => *', [animate('0.3s ease-in-out')]),
+    ]),
+  ],
 })
-export class AddListDialogComponent {
+export class AddListDialogComponent implements OnInit {
   readonly options = {
-    colors: [
-      '#45B3E7',
-      '#0078ff',
-      '#bd00ff',
-      '#d696bb',
-      '#fa3c4c',
-      '#ff9a00',
-      '#fff000',
-      '#01ff1f',
-      '#41bc66',
-      '#967259',
-      '#444444',
-    ],
-    icons: [
-      'format_list_bulleted',
-      'bookmark',
-      'push_pin',
-      'card_giftcard',
-      'cake',
-      'school',
-      'article',
-      'money',
-      'music_note',
-      'people',
-      'shopping_cart',
-      'airplanemode_on',
-      'train',
-      'directions_bus',
-    ],
+    colors: listColors,
+    icons: listIcons,
   };
   addListFormGroup!: FormGroup;
+  delayedIcon!: string;
+  iconAnimationState: 'void' | 'shown' | 'hidden' = 'void';
 
   constructor(
     private dialogRef: MatDialogRef<AddListDialogComponent>,
     private firestoreService: FirestoreService
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.addListFormGroup = new FormGroup({
       name: new FormControl('', [Validators.required]),
       color: new FormControl(this.options.colors[0], [Validators.required]),
       icon: new FormControl(this.options.icons[0], [Validators.required]),
     });
+
+    this.delayedIcon = this.options.icons[0];
   }
 
-  get name() {
-    return this.addListFormGroup.get('name');
+  handleColorSelect(color: string) {
+    this.addListFormGroup.patchValue({
+      color: color,
+    });
   }
-  get icon() {
-    return this.addListFormGroup.get('icon');
+
+  handleIconSelect(icon: string): void {
+    if (this.delayedIcon === icon) return;
+
+    this.iconAnimationState = 'hidden';
+
+    this.addListFormGroup.patchValue({
+      icon: icon,
+    });
+
+    setTimeout(() => {
+      this.iconAnimationState = 'shown';
+      this.delayedIcon = icon;
+    }, 300);
   }
 
   onSubmit(): void {
-    if (this.addListFormGroup.valid && this.addListFormGroup.value) {
-      this.firestoreService.addList(
-        this.addListFormGroup.value.name,
-        this.addListFormGroup.value.color,
-        this.addListFormGroup.value.icon
-      );
-      this.dialogRef.close();
-    }
+    if (!this.addListFormGroup.valid) return;
+
+    this.firestoreService.addList(
+      this.addListFormGroup.value.name,
+      this.addListFormGroup.value.color,
+      this.addListFormGroup.value.icon
+    );
+
+    this.dialogRef.close();
   }
 
   onCancel(): void {
