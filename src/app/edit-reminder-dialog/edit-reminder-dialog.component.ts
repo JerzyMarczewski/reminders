@@ -64,8 +64,16 @@ export class EditReminderDialogComponent {
     return timestamp ? new Date(timestamp.seconds * 1000) : undefined;
   }
 
-  getTimeFromDate(date: Date | undefined) {
-    return date ? `${date.getHours()}:${date.getMinutes()}` : undefined;
+  getTimeFromDate(date: Date | undefined): string | undefined {
+    if (!date) return undefined;
+
+    const hours = `${date.getHours()}`;
+    const minutes = `${date.getMinutes()}`;
+
+    const hoursIn2digits = hours.length === 1 ? '0' + hours : hours;
+    const minutesIn2digits = minutes.length === 1 ? '0' + minutes : minutes;
+
+    return `${hoursIn2digits}:${minutesIn2digits}`;
   }
 
   getTimestampFromDate(date: Date | undefined, time: string | undefined) {
