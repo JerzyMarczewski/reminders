@@ -1,30 +1,77 @@
+@import "../variables";
+
 :host {
-  height: 100%;
-  flex: 3;
+  @media only screen and (min-width: $lg) {
+    flex: 2;
+  }
+  
+  @media only screen and (min-width: $xl2) {
+    flex: 3;
+  }
 
-  padding: 1rem 0 1rem 2rem;
+  .panel {
+    position: fixed;
+    width: 100vw;
+    height: 100%;
+    flex: 3;
+  
+    padding-left: 1rem;
+    padding-bottom: 3rem;
+    z-index: 100;
+    background-color: #fff;
+    overflow-y: scroll;
+
+    @media only screen and (min-width: $lg) {
+      position: static;
+      width: auto;
+    }
+  
+    > .listOverview {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  
+  
+      .listNameWrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin: 1rem 0.25rem 1rem -1rem;
+
+        @media only screen and (min-width: $lg) {
+          margin: 1rem 0.25rem 1rem 1rem;
+        }
+
+        .backArrow {
+          @media only screen and (min-width: $lg) {
+            display: none;
+          }
+        }
 
 
-  > .listOverview {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+        > h1 {
+          margin: 0;
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-left: -1rem;
 
-
-    > h1 {
-      margin: 0 0 2rem 0;
-      font-size: 3rem;
-      font-weight: 700;
+          @media only screen and (min-width: $lg) {
+            margin-left: 0;
+          }
+        }
+      }
+    }
+  
+    > .messageWrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  
+      margin-top: 5rem;
+      width: 100%;
+      color: #999;
     }
   }
-
-  > .messageWrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    margin-top: 8rem;
-    width: 100%;
-    color: #999;
-  }
 }
+
