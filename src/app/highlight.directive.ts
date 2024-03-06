@@ -7,6 +7,9 @@ export class HighlightDirective {
   @Input('appHighlight') isSelected: boolean = false;
   @Input('appColor') orginalColor!: string;
 
+  private readonly defaultColor = '#FAF9F6';
+  private readonly highlightColor = '#2E8DDC';
+
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnChanges(): void {
@@ -21,9 +24,9 @@ export class HighlightDirective {
     this.renderer.setStyle(
       this.el.nativeElement,
       'background-color',
-      '#2383D1'
+      this.highlightColor
     );
-    this.renderer.setStyle(this.el.nativeElement, 'color', '#ffffff');
+    this.renderer.setStyle(this.el.nativeElement, 'color', this.defaultColor);
 
     this.highlightIconBorder();
   }
@@ -37,7 +40,7 @@ export class HighlightDirective {
 
   private highlightIconBorder(): void {
     const iconWrapper = this.el.nativeElement.querySelector('.iconWrapper');
-    this.renderer.setStyle(iconWrapper, 'border-color', '#ffffff');
+    this.renderer.setStyle(iconWrapper, 'border-color', this.defaultColor);
   }
 
   private changeBackIconBorder(): void {
