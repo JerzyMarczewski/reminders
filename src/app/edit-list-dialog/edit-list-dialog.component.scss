@@ -1,0 +1,103 @@
+@import "../variables";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1rem;
+  max-height: calc(100svh - 4rem);
+  cursor: default;
+
+  @media only screen and (min-width: $md) {
+    min-width: $dialog-md-min-width;
+  }
+
+  @media only screen and (min-width: $lg) {
+    min-width: $dialog-lg-min-width;
+  }
+
+  .listPreview {
+    min-width: 4rem;
+    width: 4rem;
+    min-height: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: background-color 0.5s ease-in-out;
+  }
+
+  .content {
+    width: 100%;
+
+    form {
+      display: flex;
+      flex-direction: column;
+  
+      h3 {
+        margin: 1rem 0;
+      }
+      
+      .colorOptions, .iconOptions {
+        $circle-size: 3rem;
+        $outlined-circle-size: calc($circle-size + 0.4rem);
+  
+        display: grid;
+        grid-template-columns: repeat(auto-fill, $outlined-circle-size);
+        grid-auto-rows: $outlined-circle-size; 
+        gap: 0.5rem;
+        justify-content: center;
+  
+        button {
+          width: $circle-size;
+          height: $circle-size;
+          border-radius: 50%;
+          box-shadow: none;
+          position: relative;
+  
+          &::after {
+            content: ' ';
+            position: absolute;
+            width: $outlined-circle-size;
+            height: $outlined-circle-size;
+            border-radius: 50%;
+            
+            border: 0rem solid transparent;
+            transition: border-width 0.3s ease-in-out, border-color 0.2s ease-in-out;
+          }
+  
+          &.selected::after {
+            border: 0.3rem solid $light-gray;
+  
+            transition: border-width 0.3s ease-in-out, border-color 0.2s ease-in-out;
+          }
+        }
+      }
+  
+      .iconOptions {
+        button {
+          background-color: $light-gray;
+        }
+      }
+    }
+  }
+
+  .actions {
+    margin: 1rem 0;
+
+    button {
+      padding: 1rem 2rem;
+      border-radius: 5rem;
+      cursor: pointer;
+    }
+  }
+}
+
+
+
