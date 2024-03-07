@@ -7,7 +7,6 @@ import { List } from './list.model';
 import { Reminder } from './reminder.model';
 import { EditReminderDialogComponent } from './edit-reminder-dialog/edit-reminder-dialog.component';
 import { EditUserProfileDialogComponent } from './edit-user-profile-dialog/edit-user-profile-dialog.component';
-import { Avatar } from './avatar.model';
 
 @Injectable({
   providedIn: 'root',
@@ -25,10 +24,8 @@ export class DialogService {
     });
   }
 
-  openAddReminderDialog(selectedList: List | undefined): void {
-    this.dialog.open(AddReminderDialogComponent, {
-      data: selectedList,
-    });
+  openAddReminderDialog(): void {
+    this.dialog.open(AddReminderDialogComponent);
   }
 
   openEditReminderDialog(reminder: Reminder): void {
@@ -37,11 +34,7 @@ export class DialogService {
     });
   }
 
-  openEditProfileDialog(profileData: {
-    username: string;
-    userAvatar: Avatar;
-    avatarOptions: Avatar[];
-  }): void {
-    this.dialog.open(EditUserProfileDialogComponent, { data: profileData });
+  openEditProfileDialog(): void {
+    this.dialog.open(EditUserProfileDialogComponent);
   }
 }
