@@ -14,13 +14,11 @@ import {
 } from '@angular/fire/firestore';
 import {
   Observable,
-  iif,
   of,
   switchMap,
   map,
   from,
   catchError,
-  throwError,
   BehaviorSubject,
 } from 'rxjs';
 import { Reminder } from './reminder.model';
@@ -40,7 +38,7 @@ export class FirestoreService {
   remindersCollection!: CollectionReference;
 
   constructor(private firestore: Firestore, private authService: AuthService) {
-    this.currentUser$ = this.authService.getCurrentUser$();
+    this.currentUser$ = this.authService.currentUser$;
 
     this.listsCollection = collection(this.firestore, 'lists');
     this.remindersCollection = collection(this.firestore, 'reminders');
@@ -88,6 +86,17 @@ export class FirestoreService {
     return data.sort(
       (element1, element2) =>
         element1.creationDate.seconds - element2.creationDate.seconds
+    );
+  }
+
+  getNumberOfUncompletedReminders$(list: List): Observable<number> {
+    return this.userReminders$.pipe(
+      map(
+        (reminders) =>
+          reminders.filter(
+            (reminder) => reminder.listId === list.id && !reminder.completed
+          ).length
+      )
     );
   }
 
