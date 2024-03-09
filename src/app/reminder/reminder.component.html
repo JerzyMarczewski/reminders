@@ -1,20 +1,23 @@
 <div class="completeButtonWrapper">
   <button
     class="completeButton"
-    [ngStyle]="{ 'border-color': listColor }"
+    [ngStyle]="{
+      'border-color': listColor,
+      'background-image':
+        'radial-gradient(farthest-side, ' + listColor + ' 94%, #0000)'
+    }"
+    [@fillCircleAnimation]="reminderAnimationState"
     (click)="toggleReminder()"
-  >
-    <div
-      class="compleButton-innerCircle"
-      *ngIf="reminder.completed"
-      [ngStyle]="{ 'background-color': listColor }"
-    ></div>
-  </button>
+  ></button>
 </div>
 
-<div class="info" [ngClass]="{ completed: reminder.completed }">
+<div
+  class="info"
+  [ngClass]="{ completed: reminderAnimationState === 'completed' }"
+>
   <h1 class="info-title">
     {{ reminder.title }}
+    <div class="bar" [@crossTextAnimation]="reminderAnimationState"></div>
   </h1>
   <p class="info-desc">{{ reminder.description }}</p>
   <p
