@@ -11,6 +11,10 @@ export class AppService {
   avatarsLoading$: Observable<boolean> =
     this.avatarsLoadingSubject.asObservable();
 
+  private userImageLoadingSubject = new BehaviorSubject<boolean>(true);
+  userImageLoading$: Observable<boolean> =
+    this.userImageLoadingSubject.asObservable();
+
   private selectedListSubject = new BehaviorSubject<List | null>(null);
   selectedList$ = this.selectedListSubject.asObservable();
 
@@ -32,6 +36,10 @@ export class AppService {
 
   setAvatarsLoading(loading: boolean): void {
     this.avatarsLoadingSubject.next(loading);
+  }
+
+  setUserImageLoading(loading: boolean): void {
+    this.userImageLoadingSubject.next(loading);
   }
 
   setSelectedList(list: List | null): void {
