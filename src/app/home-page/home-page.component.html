@@ -1,45 +1,18 @@
 <div id="homePage">
-  <mat-toolbar class="toolbar" color="primary">
-    <button mat-mini-fab [matMenuTriggerFor]="addMenu">
-      <mat-icon>add</mat-icon>
-    </button>
-    <mat-menu #addMenu="matMenu">
-      <button mat-menu-item (click)="openAddListDialog()">Add a list</button>
-      <button mat-menu-item (click)="openAddReminderDialog()">
-        Add a reminder
-      </button>
-    </mat-menu>
-    <button class="userButton" mat-mini-fab [matMenuTriggerFor]="userMenu">
-      <img
-        src="../../assets/images/default-avatar.png"
-        alt="default avatar image"
-      />
-    </button>
-    <mat-menu #userMenu="matMenu">
-      <p *ngIf="username$ | async as username">{{ username }}</p>
-      <button mat-menu-item (click)="handleSignOut()">Sign Out</button>
-    </mat-menu>
-  </mat-toolbar>
-
+  <app-navbar></app-navbar>
   <div
     class="spinnerWrapper"
-    *ngIf="isLoading.lists || isLoading.reminders; else containersData"
+    *ngIf="
+      (avatarsLoading$ | async) || (userImageLoading$ | async);
+      else loadedData
+    "
   >
     <mat-spinner></mat-spinner>
   </div>
-
-  <ng-template #containersData>
+  <ng-template #loadedData>
     <div class="containers">
-      <app-list-panel
-        [userLists]="userLists"
-        [userReminders]="userReminders"
-        [selectedList]="selectedList"
-        (listSelect)="changeSelectedList($event)"
-      />
-      <app-selected-list-panel
-        [userReminders]="userReminders"
-        [selectedList]="selectedList"
-      />
+      <app-list-panel />
+      <app-selected-list-panel />
     </div>
   </ng-template>
 </div>
