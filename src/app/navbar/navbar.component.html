@@ -1,4 +1,8 @@
-<mat-toolbar class="toolbar" color="primary">
+<mat-toolbar
+  class="toolbar"
+  color="primary"
+  [ngStyle]="{ display: (userImageLoading$ | async) ? 'none' : 'flex' }"
+>
   <button mat-mini-fab [matMenuTriggerFor]="addMenu">
     <mat-icon>add</mat-icon>
   </button>
@@ -22,7 +26,11 @@
   </mat-menu>
 
   <button mat-mini-fab class="userButton" [matMenuTriggerFor]="userMenu">
-    <img [src]="userAvatar?.url" alt="avatar image" />
+    <img
+      [src]="(userAvatar$ | async)?.url"
+      alt="avatar image"
+      (load)="handleImageLoading($event)"
+    />
   </button>
   <mat-menu #userMenu="matMenu">
     <button mat-menu-item disabled *ngIf="currentUser$ | async as currentUser">

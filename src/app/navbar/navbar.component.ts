@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { Avatar } from '../avatar.model';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { StorageService } from '../storage.service';
 import { AuthService } from '../auth.service';
 import { User } from '@angular/fire/auth';
 import { DialogService } from '../dialog.service';
-import { List } from '../list.model';
+import { AppService } from '../app.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,28 +13,21 @@ import { List } from '../list.model';
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  @Input({ required: true }) selectedList!: List | null;
-  @Input({ required: true }) avatarOptions!: Avatar[] | null;
   currentUser$!: BehaviorSubject<User | null>;
-  userAvatar: Avatar | null = null;
-  private avatarSubscription!: Subscription;
+  userAvatar$!: Observable<Avatar | null>;
+  userImageLoading$!: Observable<boolean>;
 
   constructor(
     private authService: AuthService,
     private dialogService: DialogService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private appService: AppService
   ) {}
 
   ngOnInit(): void {
-    this.currentUser$ = this.authService.getCurrentUser$();
-
-    this.avatarSubscription = this.storageService
-      .getUserAvatar()
-      .subscribe((avatar) => {
-        if (!avatar) return;
-
-        this.userAvatar = avatar;
-      });
+    this.currentUser$ = this.authService.currentUser$;
+    this.userAvatar$ = this.storageService.userAvatar$;
+    this.userImageLoading$ = this.appService.userImageLoading$;
   }
 
   openAddListDialog(): void {
@@ -42,27 +35,22 @@ export class NavbarComponent {
   }
 
   openAddReminderDialog(): void {
-    this.dialogService.openAddReminderDialog(this.selectedList);
+    this.dialogService.openAddReminderDialog();
   }
 
   onEditProfile(): void {
     const user = this.currentUser$.getValue();
 
-    if (!user || !user.displayName || !this.userAvatar || !this.avatarOptions)
-      return;
+    if (!user || !user.displayName) return;
 
-    this.dialogService.openEditProfileDialog({
-      username: user.displayName,
-      userAvatar: this.userAvatar,
-      avatarOptions: this.avatarOptions,
-    });
+    this.dialogService.openEditProfileDialog();
+  }
+
+  handleImageLoading(e: Event): void {
+    this.appService.setUserImageLoading(false);
   }
 
   handleSignOut() {
     this.authService.signOutUser();
-  }
-
-  ngOnDestroy(): void {
-    if (this.avatarSubscription) this.avatarSubscription.unsubscribe();
   }
 }
