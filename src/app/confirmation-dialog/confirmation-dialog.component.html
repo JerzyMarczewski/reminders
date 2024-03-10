@@ -1,0 +1,23 @@
+<mat-icon
+  aria-hidden="false"
+  aria-label="Warning icon"
+  color="warn"
+  fontIcon="warning icon"
+></mat-icon>
+<mat-dialog-content>
+  {{ data.message || "Are you sure you want to perform this action?" }}
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-stroked-button type="button" [mat-dialog-close]="false">
+    Cancel
+  </button>
+  <button
+    mat-flat-button
+    type="button"
+    color="warn"
+    [mat-dialog-close]="true"
+    cdkFocusInitial
+  >
+    Confirm
+  </button>
+</mat-dialog-actions>
