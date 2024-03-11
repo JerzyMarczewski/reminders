@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { FirestoreService } from './firestore.service';
-import { Observable, map } from 'rxjs';
-import { Reminder } from './reminder.model';
-import { List } from './list.model';
+import { Component } from '@angular/core';
+import { finalize, forkJoin, map, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { User } from '@angular/fire/auth';
+import { StorageService } from './storage.service';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -13,20 +12,39 @@ import { User } from '@angular/fire/auth';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  uid$: Observable<string | null>;
-  constructor(private router: Router, private authService: AuthService) {
-    this.uid$ = this.authService.uid$;
-  }
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private storageService: StorageService,
+    private appService: AppService
+  ) {}
 
-  navigateToLogin(): void {
-    this.router.navigate(['/login']);
-  }
+  ngOnInit() {
+    this.authService.user$.subscribe((user: User | null) => {
+      if (user) this.router.navigate(['/']);
+      else if (this.router.url === '/') this.router.navigate(['/sign-in']);
+    });
 
-  navigateToRegister(): void {
-    this.router.navigate(['/register']);
-  }
+    this.storageService.allAvatarsSorted$
+      .pipe(
+        map((avatars) => avatars.map((avatar) => avatar.url)),
+        tap((urls) => {
+          const preloads = urls.map(
+            (url) =>
+              new Promise<void>((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve();
+                img.onerror = () => reject();
+                img.src = url;
+              })
+          );
 
-  navigateToHome(): void {
-    this.router.navigate(['/']);
+          return forkJoin(preloads);
+        }),
+        finalize(() => {
+          this.appService.setAvatarsLoading(false);
+        })
+      )
+      .subscribe();
   }
 }
