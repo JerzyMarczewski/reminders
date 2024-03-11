@@ -7,6 +7,8 @@ import { List } from './list.model';
 import { Reminder } from './reminder.model';
 import { EditReminderDialogComponent } from './edit-reminder-dialog/edit-reminder-dialog.component';
 import { EditUserProfileDialogComponent } from './edit-user-profile-dialog/edit-user-profile-dialog.component';
+import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +38,13 @@ export class DialogService {
 
   openEditProfileDialog(): void {
     this.dialog.open(EditUserProfileDialogComponent);
+  }
+
+  openConfirmationDialog(message: string): Observable<boolean> {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { message },
+    });
+
+    return dialogRef.afterClosed();
   }
 }
