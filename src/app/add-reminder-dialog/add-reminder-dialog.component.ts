@@ -1,10 +1,11 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { FirestoreService } from '../firestore.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Reminder } from '../reminder.model';
 import { List } from '../list.model';
-import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
+import { Timestamp } from '@angular/fire/firestore';
+import { AppService } from '../app.service';
 
 @Component({
   selector: 'app-add-reminder-dialog',
@@ -13,50 +14,57 @@ import { Subscription } from 'rxjs';
 })
 export class AddReminderDialogComponent {
   addReminderFormGroup!: FormGroup;
-  userLists: List[] = [];
-  private listsSubscription!: Subscription;
+  lists$!: Observable<List[]>;
 
   constructor(
     private dialogRef: MatDialogRef<AddReminderDialogComponent>,
+    private appService: AppService,
     private firestoreService: FirestoreService
   ) {}
 
   ngOnInit(): void {
+    this.lists$ = this.firestoreService.userLists$;
+
+    const listId = this.appService.getSelectedList()?.id ?? null;
+
     this.addReminderFormGroup = new FormGroup({
       title: new FormControl('', [Validators.required]),
       description: new FormControl(''),
       dueDate: new FormControl<Date | null>(null),
-      list: new FormControl<List | null>(null, [Validators.required]),
+      dueTime: new FormControl<string | null>(null),
+      listId: new FormControl<string | null>(listId, [Validators.required]),
     });
-
-    this.listsSubscription = this.firestoreService.lists$.subscribe((lists) => {
-      this.userLists = lists;
-    });
-  }
-
-  get title() {
-    return this.addReminderFormGroup.get('title');
-  }
-  get list() {
-    return this.addReminderFormGroup.get('list');
   }
 
   onSubmit(): void {
-    console.log(
-      this.addReminderFormGroup.value.title,
-      this.addReminderFormGroup.value.list.id,
-      this.addReminderFormGroup.value.description,
-      this.addReminderFormGroup.value.dueDate
-    );
-    if (this.addReminderFormGroup.valid) {
-      this.firestoreService.addReminder(
-        this.addReminderFormGroup.value.title,
-        this.addReminderFormGroup.value.list.id,
-        this.addReminderFormGroup.value.description,
-        this.addReminderFormGroup.value.dueDate
-      );
-      this.dialogRef.close();
+    if (!this.addReminderFormGroup.valid) return;
+
+    const dueDate = this.addReminderFormGroup.get('dueDate')?.value;
+    const dueTime = this.addReminderFormGroup.get('dueTime')?.value;
+
+    console.log(typeof dueTime);
+
+    const selectedDate: Date | undefined = dueDate;
+
+    if (selectedDate && dueTime) {
+      const [hours, minutes] = dueTime.split(':').map(Number);
+
+      selectedDate.setHours(hours);
+      selectedDate.setMinutes(minutes);
     }
+
+    const selectedDateTimestamp: Timestamp | undefined = selectedDate
+      ? Timestamp.fromDate(selectedDate)
+      : undefined;
+
+    this.firestoreService.addReminder(
+      this.addReminderFormGroup.value.title,
+      this.addReminderFormGroup.value.listId,
+      this.addReminderFormGroup.value.description,
+      selectedDateTimestamp
+    );
+
+    this.dialogRef.close();
   }
 
   onCancel(): void {
