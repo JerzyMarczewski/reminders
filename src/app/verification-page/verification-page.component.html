@@ -1,0 +1,18 @@
+<div class="modal">
+  <mat-icon color="primary">email</mat-icon>
+  <h1>Verify your email address</h1>
+  <p>
+    Your verification email has been sent. Please check your email inbox and
+    follow the instructions to verify your email address.
+  </p>
+  <button
+    mat-stroked-button
+    color="primary"
+    (click)="resendVerificationEmail()"
+  >
+    Resend Verification Email
+  </button>
+  <button mat-flat-button color="primary" (click)="confirmVerification()">
+    Continue
+  </button>
+</div>
