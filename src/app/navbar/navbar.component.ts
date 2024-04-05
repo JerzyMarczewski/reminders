@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { Avatar } from '../avatar.model';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, take } from 'rxjs';
 import { StorageService } from '../storage.service';
 import { AuthService } from '../auth.service';
 import { User } from '@angular/fire/auth';
 import { DialogService } from '../dialog.service';
 import { AppService } from '../app.service';
+import { FirestoreService } from '../firestore.service';
 
 @Component({
   selector: 'app-navbar',
@@ -21,7 +22,8 @@ export class NavbarComponent {
     private authService: AuthService,
     private dialogService: DialogService,
     private storageService: StorageService,
-    private appService: AppService
+    private appService: AppService,
+    private firestoreService: FirestoreService
   ) {}
 
   ngOnInit(): void {
@@ -50,7 +52,24 @@ export class NavbarComponent {
     this.appService.setUserImageLoading(false);
   }
 
-  handleSignOut() {
-    this.authService.signOutUser();
+  handleSignOut(): void {
+    this.dialogService
+      .openConfirmationDialog('Are you sure you want to sign out?')
+      .pipe(take(1))
+      .subscribe((result) => {
+        if (result) this.authService.signOutUser();
+      });
+  }
+
+  handleDeleteUser(): void {
+    this.dialogService
+      .openReenterCredentialsDialog('Delete Account')
+      .pipe(take(1))
+      .subscribe((result) => {
+        if (result === null) return;
+
+        const { email, password } = result;
+        this.firestoreService.deleteUserAndAllData(email, password);
+      });
   }
 }
