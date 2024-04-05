@@ -11,6 +11,7 @@ import {
   query,
   updateDoc,
   where,
+  writeBatch,
 } from '@angular/fire/firestore';
 import {
   Observable,
@@ -24,7 +25,13 @@ import {
 import { Reminder } from './reminder.model';
 import { List } from './list.model';
 import { AuthService } from './auth.service';
-import { User } from '@angular/fire/auth';
+import {
+  Auth,
+  User,
+  deleteUser,
+  signInWithEmailAndPassword,
+} from '@angular/fire/auth';
+import { SnackbarService } from './snackbar.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +44,12 @@ export class FirestoreService {
   listsCollection!: CollectionReference;
   remindersCollection!: CollectionReference;
 
-  constructor(private firestore: Firestore, private authService: AuthService) {
+  constructor(
+    private firestore: Firestore,
+    private authService: AuthService,
+    private snackbarService: SnackbarService,
+    private auth: Auth
+  ) {
     this.currentUser$ = this.authService.currentUser$;
 
     this.listsCollection = collection(this.firestore, 'lists');
@@ -58,7 +70,7 @@ export class FirestoreService {
     );
   }
 
-  private getUserListsData(uid: string) {
+  private getUserListsData(uid: string): Observable<List[]> {
     const userListsQuery = query(
       this.listsCollection,
       where('userId', '==', uid)
@@ -69,7 +81,7 @@ export class FirestoreService {
     }) as Observable<List[]>;
   }
 
-  private getUserRemindersData(uid: string) {
+  private getUserRemindersData(uid: string): Observable<Reminder[]> {
     const userRemindersQuery = query(
       this.remindersCollection,
       where('userId', '==', uid)
@@ -100,13 +112,10 @@ export class FirestoreService {
     );
   }
 
-  addList(name: string, color: string, icon: string) {
+  addList(name: string, color: string, icon: string): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not add a new list, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const newList: Partial<List> = {
       creationDate: Timestamp.fromDate(new Date()),
@@ -116,53 +125,39 @@ export class FirestoreService {
       userId: user.uid,
     };
 
-    return from(addDoc(this.listsCollection, newList)).pipe(
-      catchError((error) => {
-        console.error('Error adding list:', error);
-        throw error;
-      })
+    addDoc(this.listsCollection, newList).catch((error) =>
+      this.snackbarService.displayFirebaseError(
+        error,
+        'Error while adding list.'
+      )
     );
   }
 
-  editList(updatedList: List) {
+  editList(updatedList: List): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not edit list, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const listRef = doc(this.firestore, 'lists', updatedList.id);
     const { id, ...updatedListWithoutId } = updatedList;
 
-    return from(
-      updateDoc(listRef, {
-        ...updatedListWithoutId,
-      })
-    ).pipe(
-      catchError((error) => {
-        console.error('Error editing list:', error);
-        throw error;
-      })
-    );
+    updateDoc(listRef, {
+      ...updatedListWithoutId,
+    }).catch((error) => {
+      this.snackbarService.displayFirebaseError(error, 'Error editing list.');
+    });
   }
 
-  deleteList(listId: string) {
+  deleteList(listId: string): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not delete list, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const listRef = doc(this.firestore, 'lists', listId);
 
-    return from(deleteDoc(listRef)).pipe(
-      catchError((error) => {
-        console.error('Error deleting list:', error);
-        throw error;
-      })
-    );
+    deleteDoc(listRef).catch((error) => {
+      this.snackbarService.displayFirebaseError(error, 'Error deleting list.');
+    });
   }
 
   addReminder(
@@ -170,13 +165,10 @@ export class FirestoreService {
     listId: string,
     description?: string,
     dueDate?: Timestamp
-  ) {
+  ): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not add a new reminder, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const newReminder: Partial<Reminder> = {
       creationDate: Timestamp.fromDate(new Date()),
@@ -188,12 +180,12 @@ export class FirestoreService {
     if (description) newReminder.description = description;
     if (dueDate) newReminder.dueDate = dueDate;
 
-    return from(addDoc(this.remindersCollection, newReminder)).pipe(
-      catchError((error) => {
-        console.error('Error adding reminder:', error);
-        throw error;
-      })
-    );
+    addDoc(this.remindersCollection, newReminder).catch((error) => {
+      this.snackbarService.displayFirebaseError(
+        error,
+        'Error adding reminder.'
+      );
+    });
   }
 
   editReminder(
@@ -205,13 +197,10 @@ export class FirestoreService {
     listId: string,
     description?: string,
     dueDate?: Timestamp
-  ) {
+  ): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not add a new reminder, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const reminderRef = doc(this.firestore, 'reminders', id);
     const updatedReminder: Partial<Reminder> = {
@@ -224,52 +213,113 @@ export class FirestoreService {
     if (description) updatedReminder.description = description;
     if (dueDate) updatedReminder.dueDate = dueDate;
 
-    return from(updateDoc(reminderRef, updatedReminder)).pipe(
-      catchError((error) => {
-        console.error('Error editing reminder:', error);
-        throw error;
-      })
-    );
+    updateDoc(reminderRef, updatedReminder).catch((error) => {
+      this.snackbarService.displayFirebaseError(
+        error,
+        'Error editing reminder:.'
+      );
+    });
   }
 
-  toggleReminderCompletion(reminder: Reminder) {
+  toggleReminderCompletion(reminder: Reminder): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not add a new reminder, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const reminderRef = doc(this.firestore, 'reminders', reminder.id);
     reminder.completed = !reminder.completed;
     const { id, ...updatedReminderWithoutId } = reminder;
 
-    return from(
-      updateDoc(reminderRef, {
-        ...updatedReminderWithoutId,
-      })
-    ).pipe(
-      catchError((error) => {
-        console.error('Error toggling reminder completion:', error);
-        throw error;
-      })
-    );
+    updateDoc(reminderRef, {
+      ...updatedReminderWithoutId,
+    }).catch((error) => {
+      this.snackbarService.displayFirebaseError(
+        error,
+        'Error toggling reminder completion status.'
+      );
+    });
   }
 
-  deleteReminder(reminderId: string) {
+  deleteReminder(reminderId: string): void {
     const user = this.currentUser$.getValue();
 
-    if (!user)
-      throw new Error(
-        'Could not delete reminder, because the user is not authenticated'
-      );
+    if (!user) return;
 
     const reminderRef = doc(this.firestore, 'reminders', reminderId);
-    return from(deleteDoc(reminderRef)).pipe(
-      catchError((error) => {
-        console.error('Error deleting reminder:', error);
-        throw error;
+    deleteDoc(reminderRef).catch((error) => {
+      this.snackbarService.displayFirebaseError(
+        error,
+        'Error deleting reminder.'
+      );
+    });
+  }
+
+  private removeAllListsOfUser() {
+    return new Promise<void>((resolve, reject) => {
+      this.userLists$.subscribe((lists) => {
+        const batch = writeBatch(this.firestore);
+
+        lists.forEach((list) => {
+          const listRef = doc(this.firestore, 'lists', list.id);
+          batch.delete(listRef);
+        });
+
+        batch
+          .commit()
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    });
+  }
+
+  private removeAllRemindersOfUser() {
+    return new Promise<void>((resolve, reject) => {
+      this.userReminders$.subscribe((reminders) => {
+        const batch = writeBatch(this.firestore);
+
+        reminders.forEach((reminder) => {
+          const reminderRef = doc(this.firestore, 'reminders', reminder.id);
+          batch.delete(reminderRef);
+        });
+
+        batch
+          .commit()
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    });
+  }
+
+  private removeAllUserData(): Promise<[void, void]> {
+    const promise1 = this.removeAllListsOfUser();
+    const promise2 = this.removeAllRemindersOfUser();
+
+    return Promise.all([promise1, promise2]);
+  }
+
+  deleteUserAndAllData(email: string, password: string): void {
+    const user = this.currentUser$.getValue();
+    if (!user) {
+      return;
+    }
+
+    signInWithEmailAndPassword(this.auth, email, password)
+      .then(() => this.removeAllUserData())
+      .then(() => deleteUser(user))
+      .then(() => {
+        this.snackbarService.showMessage('Account deleted successfully');
       })
-    );
+      .catch((error) => {
+        console.error(error);
+        this.snackbarService.displayFirebaseError(error);
+      });
   }
 }
