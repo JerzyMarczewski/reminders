@@ -5,18 +5,39 @@
     <mat-form-field class="usernameField" appearance="outline">
       <mat-label>Username</mat-label>
       <input matInput formControlName="username" autocomplete="off" />
-      <mat-error *ngIf="profileForm.get('username')?.hasError('required')">
+      <mat-error
+        *ngIf="
+          profileForm.get('username')?.hasError('required');
+          else minlengthError
+        "
+      >
         Username is required
       </mat-error>
-      <mat-error *ngIf="profileForm.get('username')?.hasError('minlength')">
-        Username must be at least 3 characters long
-      </mat-error>
-      <mat-error *ngIf="profileForm.get('username')?.hasError('maxlength')">
-        Username cannot exceed 20 characters
-      </mat-error>
-      <mat-error *ngIf="profileForm.get('username')?.hasError('pattern')">
-        Username can only contain alphanumeric characters
-      </mat-error>
+      <ng-template #minlengthError>
+        <mat-error
+          *ngIf="
+            profileForm.get('username')?.hasError('minlength');
+            else maxlengthError
+          "
+        >
+          Username must be at least 3 characters long
+        </mat-error>
+      </ng-template>
+      <ng-template #maxlengthError>
+        <mat-error
+          *ngIf="
+            profileForm.get('username')?.hasError('maxlength');
+            else patternError
+          "
+        >
+          Username cannot exceed 20 characters
+        </mat-error>
+      </ng-template>
+      <ng-template #patternError>
+        <mat-error *ngIf="profileForm.get('username')?.hasError('pattern')">
+          Username can only contain alphanumeric characters
+        </mat-error>
+      </ng-template>
     </mat-form-field>
 
     <div class="avatarSelection">
