@@ -21,8 +21,15 @@ export class AppComponent {
 
   ngOnInit() {
     this.authService.user$.subscribe((user: User | null) => {
-      if (user) this.router.navigate(['/']);
-      else if (this.router.url === '/') this.router.navigate(['/sign-in']);
+      if (user) {
+        if (user.emailVerified) {
+          this.router.navigate(['/']);
+        } else {
+          this.router.navigate(['/verify-email']);
+        }
+      } else {
+        this.router.navigate(['/sign-in']);
+      }
     });
 
     this.storageService.allAvatarsSorted$
