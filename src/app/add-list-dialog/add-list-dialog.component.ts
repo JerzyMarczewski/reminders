@@ -1,4 +1,4 @@
-import { Component, OnInit, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FirestoreService } from '../firestore.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -44,11 +44,15 @@ export class AddListDialogComponent implements OnInit {
   ngOnInit(): void {
     this.addListFormGroup = new FormGroup({
       name: new FormControl('', [Validators.required]),
-      color: new FormControl(this.options.colors[0], [Validators.required]),
-      icon: new FormControl(this.options.icons[0], [Validators.required]),
+      color: new FormControl(this.options.colors[0] ?? null, [
+        Validators.required,
+      ]),
+      icon: new FormControl(this.options.icons[0] ?? null, [
+        Validators.required,
+      ]),
     });
 
-    this.delayedIcon = this.options.icons[0];
+    this.delayedIcon = this.addListFormGroup.value.icon;
   }
 
   handleColorSelect(color: string) {
