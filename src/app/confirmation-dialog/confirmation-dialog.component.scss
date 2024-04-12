@@ -9,6 +9,16 @@
   color: $jet;
   padding: 2rem 1rem;
 
+  .content {
+    display: flex;
+    flex-direction: column;
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
 
   button {
     padding: 1rem 2rem;
