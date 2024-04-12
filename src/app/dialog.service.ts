@@ -9,6 +9,7 @@ import { EditReminderDialogComponent } from './edit-reminder-dialog/edit-reminde
 import { EditUserProfileDialogComponent } from './edit-user-profile-dialog/edit-user-profile-dialog.component';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { Observable } from 'rxjs';
+import { ReenterCredentialsDialogComponent } from './reenter-credentials-dialog/reenter-credentials-dialog.component';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +44,19 @@ export class DialogService {
   openConfirmationDialog(message: string): Observable<boolean> {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { message },
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  openReenterCredentialsDialog(
+    title: string = 'Re-enter Credentials'
+  ): Observable<{
+    email: string;
+    password: string;
+  } | null> {
+    const dialogRef = this.dialog.open(ReenterCredentialsDialogComponent, {
+      data: { title },
     });
 
     return dialogRef.afterClosed();
