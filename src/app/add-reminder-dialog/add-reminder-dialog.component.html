@@ -1,14 +1,15 @@
 <h2 mat-dialog-title>Add New Reminder</h2>
-<mat-dialog-content>
-  <form [formGroup]="addReminderFormGroup" (ngSubmit)="onSubmit()">
-    <mat-form-field>
+<mat-dialog-content class="content">
+  <form [formGroup]="addReminderFormGroup">
+    <mat-form-field class="field" appearance="outline">
       <mat-label>Title</mat-label>
-      <input matInput formControlName="title" required />
-      <mat-error *ngIf="title?.errors?.['required']"
+      <input matInput formControlName="title" autocomplete="off" required />
+      <mat-error *ngIf="addReminderFormGroup.get('title')?.hasError('required')"
         >You must enter a value</mat-error
       >
     </mat-form-field>
-    <mat-form-field>
+
+    <mat-form-field class="field" appearance="outline">
       <mat-label>Description</mat-label>
       <textarea
         matInput
@@ -16,38 +17,58 @@
         formControlName="description"
       ></textarea>
     </mat-form-field>
-    <mat-form-field>
+
+    <mat-form-field class="field" appearance="outline">
       <mat-label>Due Date</mat-label>
-      <input matInput [matDatepicker]="picker" disabled />
+      <input matInput [matDatepicker]="picker" formControlName="dueDate" />
+      <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker color="primary" disabled="false"></mat-datepicker>
     </mat-form-field>
-    <mat-form-field>
+
+    <mat-form-field
+      *ngIf="addReminderFormGroup.get('dueDate')?.value"
+      appearance="outline"
+    >
+      <mat-label>Due Time</mat-label>
+      <input matInput type="time" formControlName="dueTime" />
+    </mat-form-field>
+
+    <mat-form-field class="field" appearance="outline">
       <mat-label>List</mat-label>
-      <mat-select formControlName="list" required>
+      <mat-select formControlName="listId" required>
         <mat-option
-          *ngFor="let list of userLists"
-          [value]="list"
+          *ngFor="let list of lists$ | async"
+          [value]="list.id"
           [ngStyle]="{ color: list.color }"
         >
           {{ list.name }}
         </mat-option>
       </mat-select>
-      <mat-error *ngIf="list?.errors?.['required']"
-        >You must choose a value</mat-error
-      >
+      <mat-error *ngIf="(lists$ | async)?.length === 0; else listRequiredError">
+        You must first create a list
+      </mat-error>
+      <ng-template #listRequiredError>
+        <mat-error
+          #listRequiredError
+          *ngIf="addReminderFormGroup.get('listId')?.hasError('required')"
+        >
+          You must select a list
+        </mat-error>
+      </ng-template>
     </mat-form-field>
-
-    <div mat-dialog-actions>
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button
-        mat-button
-        type="submit"
-        color="primary"
-        [disabled]="addReminderFormGroup.invalid"
-      >
-        Add Reminder
-      </button>
-    </div>
   </form>
 </mat-dialog-content>
+
+<mat-dialog-actions class="actions">
+  <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+  <button
+    mat-flat-button
+    type="submit"
+    color="primary"
+    [disabled]="addReminderFormGroup.invalid"
+    (click)="onSubmit()"
+  >
+    Add Reminder
+  </button>
+</mat-dialog-actions>

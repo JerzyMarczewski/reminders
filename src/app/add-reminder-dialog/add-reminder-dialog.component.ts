@@ -42,8 +42,6 @@ export class AddReminderDialogComponent {
     const dueDate = this.addReminderFormGroup.get('dueDate')?.value;
     const dueTime = this.addReminderFormGroup.get('dueTime')?.value;
 
-    console.log(typeof dueTime);
-
     const selectedDate: Date | undefined = dueDate;
 
     if (selectedDate && dueTime) {
