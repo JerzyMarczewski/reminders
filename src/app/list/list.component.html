@@ -1,13 +1,13 @@
 <mat-card
   class="listCard"
-  [appHighlight]="selected"
+  [appHighlight]="list.id === (selectedList$ | async)?.id"
   [appColor]="list.color"
-  (click)="emitSelectionToPanel()"
+  (click)="handleListSelect()"
 >
   <div
     class="iconWrapper"
-    [matBadge]="uncompletedReminders"
-    [matBadgeHidden]="uncompletedReminders === 0"
+    [matBadge]="uncompletedReminders$ | async"
+    [matBadgeHidden]="(uncompletedReminders$ | async) === 0"
     matBadgeColor="warn"
     matBadgeSize="medium"
     [ngStyle]="{

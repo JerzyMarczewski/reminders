@@ -1,5 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { List } from '../list.model';
+import { FirestoreService } from '../firestore.service';
+import { Observable } from 'rxjs';
+import { AppService } from '../app.service';
 
 @Component({
   selector: 'app-list',
@@ -8,12 +11,22 @@ import { List } from '../list.model';
 })
 export class ListComponent {
   @Input({ required: true }) list!: List;
-  @Input({ required: true }) selected!: boolean;
-  @Input({ required: true }) uncompletedReminders!: number;
+  uncompletedReminders$!: Observable<number>;
+  selectedList$!: Observable<List | null>;
 
-  @Output() listSelectEvent = new EventEmitter<List>();
+  constructor(
+    private firestoreService: FirestoreService,
+    private appService: AppService
+  ) {}
 
-  emitSelectionToPanel() {
-    this.listSelectEvent.emit(this.list);
+  ngOnInit() {
+    this.uncompletedReminders$ =
+      this.firestoreService.getNumberOfUncompletedReminders$(this.list);
+
+    this.selectedList$ = this.appService.selectedList$;
+  }
+
+  handleListSelect() {
+    this.appService.setSelectedList(this.list);
   }
 }
