@@ -1,5 +1,4 @@
-$primary: #3F51B5;
-$accent: #FF4886;
+@import "../variables";
 
 :host {
   display: flex;
@@ -14,9 +13,14 @@ $accent: #FF4886;
     padding: 2rem 4rem;
     border-radius: 1rem;
     
-    border: 0.25rem solid $primary; //#3F51B5;
+    border: 0.25rem solid $primary;
     background-color: rgba($color: $primary, $alpha: 0.2);
 
+    transform: scale(0.75, 0.75);
+
+    @media only screen and (min-width: $sm) {
+      transform: none;
+    }
 
     h1 {
       padding: 2rem 0;
@@ -31,8 +35,8 @@ $accent: #FF4886;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 0.4rem;
 
+      .field {margin-bottom: 1.5rem;}
 
       .actions {
         display: flex;

@@ -1,21 +1,27 @@
 <div id="signIn">
   <h1 class="mat-h1 mat-primary" color="primary">Sign In</h1>
   <form (ngSubmit)="onSubmit()" [formGroup]="signInFormGroup">
-    <mat-form-field class="field">
+    <mat-form-field class="field" appearance="outline">
       <mat-label>Email</mat-label>
       <input
-        type="email"
         matInput
+        type="email"
         formControlName="email"
         placeholder="example@example.com"
       />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Mail icon"
+        fontIcon="mail"
+      ></mat-icon>
       <mat-error *ngIf="email?.invalid && email?.touched">
         <span *ngIf="email?.errors?.['required']">Email is required.</span>
         <span *ngIf="email?.errors?.['email']">Invalid email format.</span>
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field class="field">
+    <mat-form-field class="field" appearance="outline">
       <mat-label>Password</mat-label>
       <input
         type="password"
@@ -23,6 +29,12 @@
         formControlName="password"
         placeholder="password"
       />
+      <mat-icon
+        matPrefix
+        aria-hidden="false"
+        aria-label="Lock icon"
+        fontIcon="lock"
+      ></mat-icon>
       <mat-error *ngIf="password?.invalid && password?.touched">
         <span *ngIf="password?.errors?.['required']"
           >Password is required.</span
