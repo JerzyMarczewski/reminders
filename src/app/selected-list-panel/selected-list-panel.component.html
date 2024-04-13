@@ -1,5 +1,5 @@
 <div class="panel" [@openClose]="animationState">
-  <div class="listOverview" *ngIf="selectedList">
+  <div class="listOverview" *ngIf="selectedList$ | async">
     <div class="listNameWrapper">
       <button
         class="backArrow"
@@ -8,16 +8,17 @@
         type="button"
         (click)="handleBackArrowClick()"
       >
-        <mat-icon [ngStyle]="{ color: selectedList.color }"
+        <mat-icon [ngStyle]="{ color: (selectedList$ | async)?.color }"
           >arrow_back_ios</mat-icon
         >
       </button>
       <h1
+        class="listName"
         [ngStyle]="{
-          color: selectedList.color
+          color: (selectedList$ | async)?.color
         }"
       >
-        {{ selectedList.name }}
+        {{ (selectedList$ | async)?.name }}
       </h1>
     </div>
     <button
@@ -26,42 +27,45 @@
       [matMenuTriggerFor]="optionsMenu"
       aria-label="Icon button with a vertical three dot icon"
     >
-      <mat-icon [ngStyle]="{ color: selectedList.color }">more_horiz</mat-icon>
+      <mat-icon [ngStyle]="{ color: (selectedList$ | async)?.color }"
+        >more_horiz</mat-icon
+      >
     </button>
     <mat-menu #optionsMenu="matMenu">
-      <button
-        mat-menu-item
-        type="button"
-        (click)="handleEditListInfoClick(selectedList)"
-      >
+      <button mat-menu-item type="button" (click)="handleEditListInfoClick()">
         <mat-icon fontIcon="info" />Edit List Info
       </button>
       <button mat-menu-item type="button" (click)="handleShowCompletedToggle()">
         <mat-icon
-          [fontIcon]="completedRemindersShown ? 'visibility_off' : 'visibility'"
-        />{{ completedRemindersShown ? "Hide Completed" : "Show Completed" }}
+          [fontIcon]="
+            (completedRemindersShown$ | async) ? 'visibility_off' : 'visibility'
+          "
+        />{{
+          (completedRemindersShown$ | async)
+            ? "Hide Completed"
+            : "Show Completed"
+        }}
       </button>
-      <button
-        mat-menu-item
-        type="button"
-        (click)="handleDeleteClick(selectedList.id)"
-      >
+      <button mat-menu-item type="button" (click)="handleDeleteClick()">
         <mat-icon fontIcon="delete" color="warn" />Delete List
       </button>
     </mat-menu>
   </div>
 
   <app-reminder
-    *ngFor="let reminder of getShownReminders()"
+    *ngFor="let reminder of filteredReminders$ | async"
     [reminder]="reminder"
-    [listColor]="selectedList?.color"
+    [listColor]="(selectedList$ | async)?.color"
   ></app-reminder>
 
-  <div class="messageWrapper" *ngIf="listHasNoReminders()">
+  <div
+    class="messageWrapper"
+    *ngIf="(filteredReminders$ | async)?.length === 0"
+  >
     <p>No reminders in the selected list</p>
   </div>
 
-  <div class="messageWrapper" *ngIf="!selectedList">
+  <div class="messageWrapper" *ngIf="!(selectedList$ | async)">
     <p>No list selected</p>
   </div>
 </div>
