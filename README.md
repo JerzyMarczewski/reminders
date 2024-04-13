@@ -8,10 +8,9 @@ A task management application inspired by Apple's Reminders. It simplifies task 
 - `RxJs`
 - `Firebase`
 - `Angular Material`
-- `Sass`
 - `TypeScript`
 - `HTML`
-- `CSS`
+- `Sass`
 
 ## ✨ Features:
 
@@ -24,8 +23,9 @@ A task management application inspired by Apple's Reminders. It simplifies task 
 - Real-Time Updates
 - Responsive Design
 - Secure Data Access
-- Animations
+- Controlled Forms with Validators
 - Notifications
+- Animations
 
 ## 📋 Functionality Overview:
 
@@ -56,4 +56,4 @@ A task management application inspired by Apple's Reminders. It simplifies task 
 
   ## 🚀 Live Application
 
-  Explore the live version of the application [here](https://reminders-4f421.web.app/sign-in).
+  Explore the live version of the application [here](https://reminders-4f421.web.app/).
