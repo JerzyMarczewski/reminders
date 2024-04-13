@@ -1,6 +1,5 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Reminder } from '../reminder.model';
-import { MatRadioButton } from '@angular/material/radio';
 import { FirestoreService } from '../firestore.service';
 import { DialogService } from '../dialog.service';
 import { Timestamp } from '@angular/fire/firestore';
