@@ -29,6 +29,7 @@
     <img
       [src]="(userAvatar$ | async)?.url"
       alt="avatar image"
+      [ngClass]="{ default: (userAvatar$ | async)?.path === 'avatars/0.png' }"
       (load)="handleImageLoading($event)"
     />
   </button>
@@ -52,6 +53,15 @@
         fontIcon="logout"
       ></mat-icon>
       Sign Out
+    </button>
+    <button mat-menu-item (click)="handleDeleteUser()">
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Delete account icon"
+        fontIcon="person_remove"
+        color="warn"
+      ></mat-icon>
+      Delete account
     </button>
   </mat-menu>
 </mat-toolbar>
