@@ -1,11 +1,5 @@
-<app-list
-  *ngFor="let list of userLists"
-  [list]="list"
-  [selected]="list.id === selectedList?.id"
-  [uncompletedReminders]="countListUncompletedReminders(list)"
-  (listSelectEvent)="handleSelectListEvent($event)"
-></app-list>
+<app-list *ngFor="let list of lists$ | async" [list]="list"></app-list>
 
-<div *ngIf="!userLists.length">
-  <p>You don't have any lists created</p>
+<div class="messageWrapper" *ngIf="(lists$ | async)?.length === 0">
+  <p>No lists created yet</p>
 </div>

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { List } from '../list.model';
-import { Reminder } from '../reminder.model';
+import { FirestoreService } from '../firestore.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-list-panel',
@@ -8,18 +9,11 @@ import { Reminder } from '../reminder.model';
   styleUrl: './list-panel.component.scss',
 })
 export class ListPanelComponent {
-  @Input({ required: true }) userLists!: List[];
-  @Input({ required: true }) userReminders!: Reminder[];
-  @Input({ required: true }) selectedList!: List | undefined;
-  @Output() listSelect = new EventEmitter<List>();
+  lists$!: Observable<List[]>;
 
-  handleSelectListEvent(list: List): void {
-    this.listSelect.emit(list);
-  }
+  constructor(private firestoreService: FirestoreService) {}
 
-  countListUncompletedReminders(list: List): number {
-    return this.userReminders.filter(
-      (reminder) => !reminder.completed && reminder.listId === list.id
-    ).length;
+  ngOnInit(): void {
+    this.lists$ = this.firestoreService.userLists$;
   }
 }

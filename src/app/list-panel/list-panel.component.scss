@@ -1,3 +1,6 @@
+@import "../variables";
+
+
 :host {
   display: flex;
   flex-direction: column;
@@ -5,7 +8,18 @@
   flex: 1;
   height: 100%;
   max-height: 100%;
+  background-color: $off-white;
 
-  border-right: 0.1rem solid #ccc;
+  border-right: 0.1rem solid $silver;
   overflow-y: auto;
+
+  .messageWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 5rem;
+    width: 100%;
+    color: $battleship-gray;
+  }
 }
